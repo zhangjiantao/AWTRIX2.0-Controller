@@ -110,6 +110,7 @@ boolean PubSubClient::connect(const char *id, const char *user, const char *pass
 }
 
 boolean PubSubClient::connect(const char *id, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage) {
+    _client->setTimeout(50);
     return connect(id,NULL,NULL,willTopic,willQos,willRetain,willMessage,1);
 }
 

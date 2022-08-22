@@ -38,6 +38,7 @@
 #include "LocalClock.h"
 
 #include <list>
+#include <map>
 #include <queue>
 
 #define LDR_PIN A0
@@ -45,7 +46,8 @@
 WiFiUDP ntpUDP;
 NTPClient ntp(ntpUDP, "ntp2.aliyun.com", 8 * 60 * 60, 5 * 60 * 1000);
 
-template <uint8_t pos_x, uint8_t pos_y, uint8_t h, uint8_t w> class Snake {
+template <uint8_t pos_x, uint8_t pos_y, uint8_t h, uint8_t w>
+class Snake : public Layer {
   typedef enum {
     Dir_right = 0,
     Dir_down,
@@ -76,14 +78,12 @@ template <uint8_t pos_x, uint8_t pos_y, uint8_t h, uint8_t w> class Snake {
 
   const uint8_t UNREACHABLE = 255;
 
-  bool show_border;
+  int animation_progress = 0;
 
 public:
-  Snake(bool show_border = true)
-      : show_border(show_border), x(random8() % h), y(random8() % w),
-        dir(Dir_right), s({std::make_pair<uint8_t, uint8_t>(0, 0)}) {}
-
-  void set_show_border(bool b) { show_border = b; }
+  Snake()
+      : x(random8() % h), y(random8() % w), dir(Dir_right),
+        s({std::make_pair<uint8_t, uint8_t>(0, 0)}) {}
 
   std::pair<uint8_t, uint8_t> next_position(DirType d) {
     auto head = s.front();
@@ -122,40 +122,27 @@ public:
     } while (any);
   }
 
-  void forward(FastLED_NeoMatrix *matrix, DirType d) {
+  void forward(DirType d) {
     auto n = next_position(d);
     auto any =
         std::any_of(s.begin(), s.end(), [&](std::pair<uint8_t, uint8_t> &node) {
           return node == n;
         });
     if (any || n.first == UNREACHABLE || n.second == UNREACHABLE) {
-      // game over
-      for (int i = 0; i < 3; i++) {
-        draw_snake(matrix, target_r, target_g, target_b);
-        delay(100);
-        matrix->show();
-        draw_snake(matrix, snake_r, snake_g, snake_b);
-        delay(100);
-        matrix->show();
-      }
+      // // game over
+      // for (int i = 0; i < 3; i++) {
+      //   draw_snake(matrix, target_r, target_g, target_b);
+      //   delay(100);
+      //   matrix->show();
+      //   draw_snake(matrix, snake_r, snake_g, snake_b);
+      //   delay(100);
+      //   matrix->show();
+      // }
+      animation_progress = 6;
 
       // border_r = random8(110, 150);
       // border_g = random8(110, 150);
       // border_b = random8(110, 150);
-
-      auto t = target_r;
-      target_r = target_g;
-      target_g = target_b;
-      target_b = t;
-
-      t = snake_r;
-      snake_r = snake_g;
-      snake_g = snake_b;
-      snake_b = t;
-
-      s.clear();
-      s.push_back({0, 0});
-      place();
     } else {
       s.pop_back();
       s.push_front(n);
@@ -287,6 +274,31 @@ public:
     return r;
   }
 
+  unsigned edges(DirType d) {
+    auto n = next_position(d);
+    if (n.first == UNREACHABLE || n.second == UNREACHABLE)
+      return 0;
+
+    uint8_t map[h][w]{0};
+    for (auto &node : s)
+      map[node.first][node.second] = UNREACHABLE;
+
+    if (map[n.first][n.second] == UNREACHABLE)
+      return 0;
+
+    unsigned r = 0;
+
+    if (n.second == w - 1 || map[n.first][n.second + 1] == UNREACHABLE)
+      r++;
+    if (n.second == 0 || map[n.first][n.second - 1] == UNREACHABLE)
+      r++;
+    if (n.first == h - 1 || map[n.first + 1][n.second] == UNREACHABLE)
+      r++;
+    if (n.first == 0 || map[n.first - 1][n.second] == UNREACHABLE)
+      r++;
+    return r;
+  }
+
   DirType next_dir() {
     auto d_best = find_path_to(x, y);
     auto m_best = measure(d_best);
@@ -303,58 +315,268 @@ public:
     auto m_up = measure(Dir_up);
 
     auto max = std::max({m_tail, m_right, m_down, m_left, m_up});
-    std::vector<DirType> ds;
-    ds.reserve(5);
+    std::map<DirType, unsigned> ds;
     if (m_tail == max)
-      ds.push_back(d_tail);
+      ds[d_tail] == edges(d_tail);
     if (m_right == max)
-      ds.push_back(Dir_right);
+      ds[Dir_right] == edges(Dir_right);
     if (m_down == max)
-      ds.push_back(Dir_down);
+      ds[Dir_down] == edges(Dir_down);
     if (m_left == max)
-      ds.push_back(Dir_left);
+      ds[Dir_left] == edges(Dir_left);
     if (m_up == max)
-      ds.push_back(Dir_up);
+      ds[Dir_up] == edges(Dir_up);
 
-    return ds[random8(ds.size())];
+    max = 0;
+    for (auto &d : ds)
+      max = std::max(max, d.second);
+
+    std::vector<DirType> r;
+    r.reserve(4);
+    for (auto &d : ds)
+      if (d.second == max)
+        r.push_back(d.first);
+
+    return r[random16(r.size())];
   }
 
-  void loop(FastLED_NeoMatrix *matrix) {
+  void loop(unsigned frame_delay) override {
     static bool seed = false;
     if (!seed) {
       random16_set_seed(ntp.getEpochTime() % UINT16_MAX);
       seed = true;
     }
 
-    // draw border
-    auto c = matrix->Color(border_r, border_g, border_b);
-    if (show_border)
-      matrix->drawRect(pos_x - 1, pos_y - 1, w + 2, h + 2, c);
+    if (animation_progress)
+      return;
 
-    // draw target
-    c = matrix->Color(target_r, target_g, target_b);
-    matrix->drawPixel(y + pos_x, x + pos_y, c);
-
-    static unsigned wait = 0;
-    wait = ++wait % 4;
-    if (wait == 0) {
+    static unsigned delay = 0;
+    delay = (delay + 1) % frame_delay;
+    if (delay == 0) {
       auto nd = next_dir();
       auto n = next_position(nd);
       if (n.first == x && n.second == y) {
         s.push_front({x, y});
         place();
       } else {
-        forward(matrix, nd);
+        forward(nd);
       }
     }
+  }
 
-    draw_snake(matrix, snake_r, snake_g, snake_b);
+  void render(FastLED_NeoMatrix *matrix) {
+    // draw border
+    auto c = matrix->Color(border_r, border_g, border_b);
+    matrix->drawRect(pos_x - 1, pos_y - 1, w + 2, h + 2, c);
+
+    // draw target
+    c = matrix->Color(target_r, target_g, target_b);
+    matrix->drawPixel(y + pos_x, x + pos_y, c);
+
+    // draw snake
+    if (animation_progress == 0) {
+      draw_snake(matrix, snake_r, snake_g, snake_b);
+    } else {
+      if (animation_progress % 2)
+        draw_snake(matrix, target_r, target_g, target_b);
+      else
+        draw_snake(matrix, snake_r, snake_g, snake_b);
+
+      animation_progress--;
+
+      if (animation_progress == 0) {
+        auto t = target_r;
+        target_r = target_g;
+        target_g = target_b;
+        target_b = t;
+
+        t = snake_r;
+        snake_r = snake_g;
+        snake_g = snake_b;
+        snake_b = t;
+
+        s.clear();
+        s.push_back({0, 0});
+        place();
+      }
+    }
   }
 };
 
-Snake<2, 2, 5, 10> l_snake;
-Snake<20, 2, 5, 10> r_snake;
+template <uint8_t offset> class DigitalClock : public Layer {
+  int last_hh = 0;
+  int last_hl = 0;
+  int last_mh = 0;
+  int last_ml = 0;
+  bool first_start = true;
+
+  int ani_hh = 0;
+  int ani_hl = 0;
+  int ani_mh = 0;
+  int ani_ml = 0;
+  int animation_progress = 0;
+
+public:
+  void loop(unsigned frame_delay) override {}
+
+  void render(FastLED_NeoMatrix *matrix) override {
+    ntp.update();
+    auto hh = ntp.getHours() / 10;
+    auto hl = ntp.getHours() % 10;
+    auto mh = ntp.getMinutes() / 10;
+    auto ml = ntp.getMinutes() % 10;
+
+    // auto c = matrix->Color(0, 255, 64);
+    matrix->setTextColor(matrix->Color(77, 147, 245));
+    char buf[10];
+    auto ntp_s = ntp.getSeconds();
+    auto ntp_d = ntp.getDay();
+    auto blink = ntp_s % 2 ? ":" : " ";
+    auto last_h = last_hh * 10 + last_hl;
+    auto last_m = last_mh * 10 + last_ml;
+    sprintf(buf, "%02d%s%02d", last_h, blink, last_m);
+    matrix->setCursor(offset + 1, 6);
+    matrix->print(buf);
+
+    auto week_f = matrix->Color(230, 230, 230);
+    auto week_b = matrix->Color(130, 130, 130);
+    auto black = matrix->Color(0, 0, 0);
+
+    if (ml != last_ml || mh != last_mh || hl != last_hl || hh != last_hh) {
+      ani_ml = last_ml;
+      ani_mh = last_mh;
+      ani_hl = last_hl;
+      ani_hh = last_hh;
+      animation_progress = 7;
+    }
+
+    if (animation_progress || first_start) {
+      if (ml != ani_ml || first_start) {
+        matrix->fillRect(offset + 15, 0, 3, 8, black);
+        matrix->setCursor(offset + 15, (7 - animation_progress) + 6);
+        matrix->printf("%d", ani_ml);
+        matrix->setCursor(offset + 15, (7 - animation_progress));
+        matrix->printf("%d", ml);
+        matrix->drawRect(offset + 15, 0, 3, 1, black);
+        matrix->drawRect(offset + 15, 6, 3, 2, black);
+      }
+
+      if (mh != ani_mh || first_start) {
+        matrix->fillRect(offset + 11, 0, 3, 8, black);
+        matrix->setCursor(offset + 11, (7 - animation_progress) + 6);
+        matrix->printf("%d", ani_mh);
+        matrix->setCursor(offset + 11, (7 - animation_progress));
+        matrix->printf("%d", mh);
+        matrix->drawRect(offset + 11, 0, 3, 1, black);
+        matrix->drawRect(offset + 11, 6, 3, 2, black);
+      }
+
+      if (hl != ani_hl || first_start) {
+        matrix->fillRect(offset + 5, 0, 3, 8, black);
+        matrix->setCursor(offset + 5, (7 - animation_progress) + 6);
+        matrix->printf("%d", ani_hl);
+        matrix->setCursor(offset + 5, (7 - animation_progress));
+        matrix->printf("%d", hl);
+        matrix->drawRect(offset + 5, 0, 3, 1, black);
+        matrix->drawRect(offset + 5, 6, 3, 2, black);
+      }
+
+      if (hh != ani_hh || first_start) {
+        matrix->fillRect(offset + 1, 0, 3, 8, black);
+        matrix->setCursor(offset + 1, (7 - animation_progress) + 6);
+        matrix->printf("%d", ani_hh);
+        matrix->setCursor(offset + 1, (7 - animation_progress));
+        matrix->printf("%d", hh);
+        matrix->drawRect(offset + 1, 0, 3, 1, black);
+        matrix->drawRect(offset + 1, 6, 3, 2, black);
+      }
+
+      animation_progress--;
+
+      if (animation_progress == 0)
+        first_start = false;
+    }
+
+    for (int i = 1; i < 7; i++) {
+      auto color = ntp_d == i ? week_f : week_b;
+      auto x0 = offset + 1 + (i - 1) * 3;
+      matrix->drawLine(x0, 7, x0 + 1, 7, color);
+    }
+
+    last_ml = ml;
+    last_mh = mh;
+    last_hl = hl;
+    last_hh = hh;
+  }
+};
+
+template <uint8_t offset> class BinaryClock : public Layer {
+public:
+  void loop(unsigned frame_delay) override {}
+
+  void render(FastLED_NeoMatrix *matrix) override {
+    ntp.update();
+    auto ntp_h = ntp.getHours();
+    auto ntp_m = ntp.getMinutes();
+    auto ntp_s = ntp.getSeconds();
+    auto r = matrix->Color(255, 0, 0);
+    auto g = matrix->Color(0, 255, 0);
+    auto b = matrix->Color(0, 0, 255);
+
+    matrix->fillRect(offset, 0, 17, 8, matrix->Color(130, 130, 130));
+
+    if ((ntp_h / 10) & 1)
+      matrix->drawRect(offset + 0, 6, 2, 2, r);
+    if ((ntp_h / 10) & 2)
+      matrix->drawRect(offset + 0, 4, 2, 2, r);
+    if ((ntp_h % 10) & 1)
+      matrix->drawRect(offset + 3, 6, 2, 2, r);
+    if ((ntp_h % 10) & 2)
+      matrix->drawRect(offset + 3, 4, 2, 2, r);
+    if ((ntp_h % 10) & 4)
+      matrix->drawRect(offset + 3, 2, 2, 2, r);
+    if ((ntp_h % 10) & 8)
+      matrix->drawRect(offset + 3, 0, 2, 2, r);
+    if ((ntp_m / 10) & 1)
+      matrix->drawRect(offset + 6, 6, 2, 2, g);
+    if ((ntp_m / 10) & 2)
+      matrix->drawRect(offset + 6, 4, 2, 2, g);
+    if ((ntp_m / 10) & 4)
+      matrix->drawRect(offset + 6, 2, 2, 2, g);
+    if ((ntp_m % 10) & 1)
+      matrix->drawRect(offset + 9, 6, 2, 2, g);
+    if ((ntp_m % 10) & 2)
+      matrix->drawRect(offset + 9, 4, 2, 2, g);
+    if ((ntp_m % 10) & 4)
+      matrix->drawRect(offset + 9, 2, 2, 2, g);
+    if ((ntp_m % 10) & 8)
+      matrix->drawRect(offset + 9, 0, 2, 2, g);
+    if ((ntp_s / 10) & 1)
+      matrix->drawRect(offset + 12, 6, 2, 2, b);
+    if ((ntp_s / 10) & 2)
+      matrix->drawRect(offset + 12, 4, 2, 2, b);
+    if ((ntp_s / 10) & 4)
+      matrix->drawRect(offset + 12, 2, 2, 2, b);
+    if ((ntp_s % 10) & 1)
+      matrix->drawRect(offset + 15, 6, 2, 2, b);
+    if ((ntp_s % 10) & 2)
+      matrix->drawRect(offset + 15, 4, 2, 2, b);
+    if ((ntp_s % 10) & 4)
+      matrix->drawRect(offset + 15, 2, 2, 2, b);
+    if ((ntp_s % 10) & 8)
+      matrix->drawRect(offset + 15, 0, 2, 2, b);
+  }
+};
+
+Snake<2, 2, 5, 10> l_d_snake;
+Snake<20, 2, 5, 10> r_d_snake;
+Snake<1, 1, 6, 13> l_b_snake;
+Snake<18, 1, 6, 13> r_b_snake;
 Snake<1, 1, 6, 30> f_snake;
+DigitalClock<0> l_d_clock;
+DigitalClock<13> r_d_clock;
+BinaryClock<0> l_b_clock;
+BinaryClock<15> r_b_clock;
 
 bool LocalClock::wait() {
   wait_start = wait_start ? wait_start : millis();
@@ -367,20 +589,10 @@ bool LocalClock::wait() {
 
 void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
                       int maxBr, bool *pushed, int *timeout) {
-  if (pushed[0] && millis() - timeout[0] < 100)
-    mode = (ShowMode)((mode + 6 - 1) % 6);
+  if (pushed[1] && millis() - timeout[1] < 100)
+    frame_delay = (frame_delay + 1) % 6 + 1;
   if (pushed[2] && millis() - timeout[2] < 100)
-    mode = (ShowMode)((mode + 1) % 6);
-
-  // static int freq = 0;
-  // freq = ++freq % 4;
-  // if (freq == 0) {
-  //   if (system_get_cpu_freq() != 80 || 1) {
-  //     REG_CLR_BIT(0x3ff00014, BIT(0));
-  //     system_update_cpu_freq(80);
-  //     os_update_cpu_frequency(80);
-  //   }
-  // }
+    mode = (ShowMode)((mode + 1) % SW_MAX);
 
   if (autoBr) {
     auto ldr = analogRead(LDR_PIN);
@@ -392,67 +604,34 @@ void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
     }
   }
 
-  ntp.update();
-  char buf[10];
-  auto ntp_sec = ntp.getSeconds();
-  auto blink = ntp_sec % 2 ? ":" : " ";
-  sprintf(buf, "%02d%s%02d", ntp.getHours(), blink, ntp.getMinutes());
-
   matrix->clear();
 
-  if (mode == LeftMode || mode == LeftNoBorder) {
-    // 时:分
-    matrix->setTextColor(matrix->Color(0, 255, 64));
-    matrix->setCursor(14, 6);
-    matrix->print(buf);
-
-    // 星期
-    auto day = ntp.getDay();
-    if (day) {
-      for (int i = 1; i < 7; i++) {
-        auto f = matrix->Color(230, 230, 230);
-        auto b = matrix->Color(130, 130, 130);
-        auto color = day == i ? f : b;
-        matrix->drawLine(14 + (i - 1) * 3, 7, 15 + (i - 1) * 3, 7, color);
-      }
-    } else {
-      for (int i = 1; i < 7; i++) {
-        auto f = matrix->Color(230, 230, 230);
-        matrix->drawLine(14 + (i - 1) * 3, 7, 15 + (i - 1) * 3, 7, f);
-      }
-    }
-  } else if (mode == RightMode || mode == RightNoBorder) {
-    // 时:分
-    matrix->setTextColor(matrix->Color(0, 255, 64));
-    matrix->setCursor(1, 6);
-    matrix->print(buf);
-
-    // 星期
-    auto day = ntp.getDay();
-    if (day) {
-      for (int i = 1; i < 7; i++) {
-        auto f = matrix->Color(230, 230, 230);
-        auto b = matrix->Color(130, 130, 130);
-        auto color = day == i ? f : b;
-        matrix->drawLine(1 + (i - 1) * 3, 7, 2 + (i - 1) * 3, 7, color);
-      }
-    } else {
-      for (int i = 1; i < 7; i++) {
-        auto f = matrix->Color(230, 230, 230);
-        matrix->drawLine(1 + (i - 1) * 3, 7, 2 + (i - 1) * 3, 7, f);
-      }
-    }
+  layers.clear();
+  switch (mode) {
+  case SWDigitalLeft:
+    layers.push_back(&l_d_snake);
+    layers.push_back(&r_d_clock);
+    break;
+  case SWDigitalRight:
+    layers.push_back(&r_d_snake);
+    layers.push_back(&l_d_clock);
+    break;
+  case SWBinaryLeft:
+    layers.push_back(&l_b_snake);
+    layers.push_back(&r_b_clock);
+    break;
+  case SWBinaryRight:
+    layers.push_back(&r_b_snake);
+    layers.push_back(&l_b_clock);
+    break;
+  case SWFullScreen:
+    layers.push_back(&f_snake);
+    break;
   }
 
-  if (mode == LeftMode || mode == LeftNoBorder) {
-    l_snake.set_show_border(mode == LeftMode);
-    l_snake.loop(matrix);
-  } else if (mode == RightMode || mode == RightNoBorder) {
-    r_snake.set_show_border(mode == RightMode);
-    r_snake.loop(matrix);
-  } else {
-    f_snake.set_show_border(mode == FullScreen);
-    f_snake.loop(matrix);
+  for (auto layer : layers) {
+    layer->loop(frame_delay);
+    layer->render(matrix);
   }
 
   matrix->show();

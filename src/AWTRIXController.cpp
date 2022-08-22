@@ -1037,7 +1037,8 @@ void reconnect() {
   if (lc.wait()) {
     hardwareAnimatedSearch(1, 28, 0);
   } else {
-    lc.loop(matrix, autoBrightness, minBrightness, maxBrightness, pushed, timeoutTaster);
+    lc.loop(matrix, autoBrightness, minBrightness, maxBrightness, pushed,
+            timeoutTaster);
   }
 
   if (client.connect(clientId.c_str(), "matrixDisconnect", 1, 0,
@@ -1499,7 +1500,6 @@ void setup() {
 }
 
 void loop() {
-  // Serial.printf("nr0 <%d> <%d> | nr1 <%d> <%d> | nr2 <%d> <%d>\n", pushed[0],millis() - timeoutTaster[0], pushed[1], millis() - timeoutTaster[1], pushed[2], millis() - timeoutTaster[2]);
   server.handleClient();
   ArduinoOTA.handle();
 
@@ -1595,7 +1595,6 @@ void loop() {
       firstStart = true;
     }
   }
-
   checkTaster(0);
   checkTaster(1);
   checkTaster(2);
