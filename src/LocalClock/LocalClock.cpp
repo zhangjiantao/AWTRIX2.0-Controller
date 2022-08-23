@@ -342,9 +342,9 @@ public:
     if (animation_progress)
       return;
 
-    static unsigned delay = 0;
-    delay = (delay + 1) % (frame_delay + 1);
-    if (delay == 0) {
+    static unsigned _delay = 0;
+    _delay = (_delay + 1) % (frame_delay + 1);
+    if (_delay == 0) {
       auto nd = next_direction();
       auto n = next_position(nd);
       if (n.first == x && n.second == y) {
@@ -409,8 +409,6 @@ class DigitalClock : public Layer {
   uint8_t animation_progress = 0;
 
 public:
-  void loop(unsigned frame_delay) override {}
-
   void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) override {
     ntp.update();
     auto hh = ntp.getHours() / 10;
@@ -504,8 +502,6 @@ public:
 
 class BinaryClock : public Layer {
 public:
-  void loop(unsigned frame_delay) override {}
-
   void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) override {
     ntp.update();
     auto ntp_h = ntp.getHours();
@@ -578,9 +574,9 @@ public:
   }
 
   void loop(unsigned frame_delay) override {
-    static unsigned delay = 0;
-    delay = (delay + 1) % (frame_delay + 1);
-    if (delay == 0) {
+    static unsigned _delay = 0;
+    _delay = (_delay + 1) % (frame_delay + 1);
+    if (_delay == 0) {
       for (uint8_t i = 0; i < w; i++) {
         int8_t r = (int8_t)random8(3) - 1;
         value[i] += r;
@@ -604,6 +600,34 @@ public:
   }
 };
 
+class BrightnessUpdater : public Layer {
+  bool _auto_br;
+  int _min_br;
+  int _max_br;
+
+public:
+  void set_auto_br(bool auto_br, int min_br, int max_br) {
+    _auto_br = auto_br;
+    _min_br = min_br;
+    _max_br = max_br;
+  }
+
+  bool is_hidden() override { return !_auto_br; }
+
+  void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) override {
+    auto ldr = analogRead(LDR_PIN);
+    static int br = 0;
+    auto update = map(ldr > 256 ? 256 : ldr, 0, 256, _min_br, _max_br);
+    if (update > br) {
+      br = br + (update - br) / 2 + 1;
+      matrix->setBrightness(br);
+    } else if (update < br) {
+      br = br - (br - update) / 2 - 1;
+      matrix->setBrightness(br);
+    }
+  }
+};
+
 Snake<5, 10> snake; // 20, 2
 Snake<6, 30> fullscreen_snake;
 
@@ -612,10 +636,14 @@ Spectrumer<5, 10> spectrumer;
 DigitalClock dclock; // 13
 BinaryClock bclock;
 
+BrightnessUpdater brightness_updater;
+
 LocalClock::LocalClock() {
   layers.push_back(&dclock);
   layers.push_back(&bclock);
   layers.push_back(&fullscreen_snake);
+
+  layers.push_back(&brightness_updater);
 
   windows.push_back(&snake);
   windows.push_back(&spectrumer);
@@ -638,15 +666,7 @@ void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
     seed = true;
   }
 
-  if (autoBr) {
-    auto ldr = analogRead(LDR_PIN);
-    static int br = 0;
-    auto newbr = map(ldr, 0, 1023, minBr, maxBr);
-    if (newbr != br) {
-      matrix->setBrightness(newbr);
-      br = newbr;
-    }
-  }
+  brightness_updater.set_auto_br(autoBr, minBr, maxBr);
 
   if (pushed[0] && millis() - timeout[0] < 100) {
     if ((layout == LAYOUT_L_DIGITAL || layout == LAYOUT_R_DIGITAL) &&

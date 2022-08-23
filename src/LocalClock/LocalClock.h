@@ -1,9 +1,9 @@
 #include <FastLED.h>
 #include <FastLED_NeoMatrix.h>
 
+#include <list>
 #include <time.h>
 #include <vector>
-#include <list>
 
 class Layer {
   bool _hidden = false;
@@ -12,8 +12,9 @@ class Layer {
   int8_t _pos_y = 0;
 
 public:
-  virtual void loop(unsigned frame_delay) = 0;
   virtual void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) = 0;
+  virtual void loop(unsigned frame_delay) {}
+  virtual bool is_hidden() { return _hidden; }
 
   Layer &render(FastLED_NeoMatrix *matrix) {
     render(matrix, _pos_x, _pos_y);
@@ -34,8 +35,6 @@ public:
     _hidden = false;
     return *this;
   }
-
-  bool is_hidden() { return _hidden; }
 
   int8_t x() { return _pos_x; }
   int8_t y() { return _pos_y; }
