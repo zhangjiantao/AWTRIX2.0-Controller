@@ -339,12 +339,6 @@ public:
   }
 
   void loop(unsigned frame_delay) override {
-    static bool seed = false;
-    if (!seed) {
-      random16_set_seed(ntp.getEpochTime() % UINT16_MAX);
-      seed = true;
-    }
-
     if (animation_progress)
       return;
 
@@ -376,9 +370,9 @@ public:
       draw_snake(matrix, pos_x + 2, pos_y + 2, snake_r, snake_g, snake_b);
     } else {
       if (animation_progress % 2)
-        draw_snake(matrix, pos_x, pos_y, target_r, target_g, target_b);
+        draw_snake(matrix, pos_x + 2, pos_y + 2, target_r, target_g, target_b);
       else
-        draw_snake(matrix, pos_x, pos_y, snake_r, snake_g, snake_b);
+        draw_snake(matrix, pos_x + 2, pos_y + 2, snake_r, snake_g, snake_b);
 
       animation_progress--;
 
@@ -522,59 +516,109 @@ public:
     auto b = matrix->Color(0, 0, 255);
 
     if ((ntp_h / 10) & 1)
-      matrix->drawRect(x + 7 + 0, y + 6, 2, 2, r);
+      matrix->drawRect(x + 8 + 0, y + 6, 2, 2, r);
     if ((ntp_h / 10) & 2)
-      matrix->drawRect(x + 7 + 0, y + 4, 2, 2, r);
+      matrix->drawRect(x + 8 + 0, y + 4, 2, 2, r);
     if ((ntp_h % 10) & 1)
-      matrix->drawRect(x + 7 + 3, y + 6, 2, 2, r);
+      matrix->drawRect(x + 8 + 3, y + 6, 2, 2, r);
     if ((ntp_h % 10) & 2)
-      matrix->drawRect(x + 7 + 3, y + 4, 2, 2, r);
+      matrix->drawRect(x + 8 + 3, y + 4, 2, 2, r);
     if ((ntp_h % 10) & 4)
-      matrix->drawRect(x + 7 + 3, y + 2, 2, 2, r);
+      matrix->drawRect(x + 8 + 3, y + 2, 2, 2, r);
     if ((ntp_h % 10) & 8)
-      matrix->drawRect(x + 7 + 3, y + 0, 2, 2, r);
+      matrix->drawRect(x + 8 + 3, y + 0, 2, 2, r);
     if ((ntp_m / 10) & 1)
-      matrix->drawRect(x + 7 + 6, y + 6, 2, 2, g);
+      matrix->drawRect(x + 8 + 6, y + 6, 2, 2, g);
     if ((ntp_m / 10) & 2)
-      matrix->drawRect(x + 7 + 6, y + 4, 2, 2, g);
+      matrix->drawRect(x + 8 + 6, y + 4, 2, 2, g);
     if ((ntp_m / 10) & 4)
-      matrix->drawRect(x + 7 + 6, y + 2, 2, 2, g);
+      matrix->drawRect(x + 8 + 6, y + 2, 2, 2, g);
     if ((ntp_m % 10) & 1)
-      matrix->drawRect(x + 7 + 9, y + 6, 2, 2, g);
+      matrix->drawRect(x + 8 + 9, y + 6, 2, 2, g);
     if ((ntp_m % 10) & 2)
-      matrix->drawRect(x + 7 + 9, y + 4, 2, 2, g);
+      matrix->drawRect(x + 8 + 9, y + 4, 2, 2, g);
     if ((ntp_m % 10) & 4)
-      matrix->drawRect(x + 7 + 9, y + 2, 2, 2, g);
+      matrix->drawRect(x + 8 + 9, y + 2, 2, 2, g);
     if ((ntp_m % 10) & 8)
-      matrix->drawRect(x + 7 + 9, y + 0, 2, 2, g);
+      matrix->drawRect(x + 8 + 9, y + 0, 2, 2, g);
     if ((ntp_s / 10) & 1)
-      matrix->drawRect(x + 7 + 12, y + 6, 2, 2, b);
+      matrix->drawRect(x + 8 + 12, y + 6, 2, 2, b);
     if ((ntp_s / 10) & 2)
-      matrix->drawRect(x + 7 + 12, y + 4, 2, 2, b);
+      matrix->drawRect(x + 8 + 12, y + 4, 2, 2, b);
     if ((ntp_s / 10) & 4)
-      matrix->drawRect(x + 7 + 12, y + 2, 2, 2, b);
+      matrix->drawRect(x + 8 + 12, y + 2, 2, 2, b);
     if ((ntp_s % 10) & 1)
-      matrix->drawRect(x + 7 + 15, y + 6, 2, 2, b);
+      matrix->drawRect(x + 8 + 15, y + 6, 2, 2, b);
     if ((ntp_s % 10) & 2)
-      matrix->drawRect(x + 7 + 15, y + 4, 2, 2, b);
+      matrix->drawRect(x + 8 + 15, y + 4, 2, 2, b);
     if ((ntp_s % 10) & 4)
-      matrix->drawRect(x + 7 + 15, y + 2, 2, 2, b);
+      matrix->drawRect(x + 8 + 15, y + 2, 2, 2, b);
     if ((ntp_s % 10) & 8)
-      matrix->drawRect(x + 7 + 15, y + 0, 2, 2, b);
+      matrix->drawRect(x + 8 + 15, y + 0, 2, 2, b);
+  }
+};
+
+template <uint8_t h, uint8_t w> class Spectrumer : public Layer {
+  int8_t value[w]{0};
+  uint8_t r[h]{0};
+  uint8_t g[h]{0};
+
+public:
+  Spectrumer() {
+    for (uint8_t i = 0; i < h; i++) {
+      auto c = map(i, 0, h - 1, 0, 256 * 2 - 2);
+      if (c < 256) {
+        g[i] = 255;
+        r[i] = c;
+      } else {
+        g[i] = 256 * 2 - c;
+        r[i] = 255;
+      }
+    }
+  }
+
+  void loop(unsigned frame_delay) override {
+    static unsigned delay = 0;
+    delay = (delay + 1) % (frame_delay + 1);
+    if (delay == 0) {
+      for (uint8_t i = 0; i < w; i++) {
+        int8_t r = (int8_t)random8(3) - 1;
+        value[i] += r;
+        if (value[i] > h || value[i] < 0)
+          value[i] -= r;
+      }
+    }
+  }
+
+  void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) {
+    // draw border
+    auto c = matrix->Color(130, 130, 130);
+    matrix->drawRect(x + 1, y + 1, w + 2, h + 2, c);
+
+    // draw spectrumer
+    for (int i = 0; i < w; i++) {
+      for (int j = 0; j < h; j++)
+        if (j < value[i])
+          matrix->drawPixel(x + 2 + i, y + 6 - j, matrix->Color(r[j], g[j], 0));
+    }
   }
 };
 
 Snake<5, 10> snake; // 20, 2
 Snake<6, 30> fullscreen_snake;
 
+Spectrumer<5, 10> spectrumer;
+
 DigitalClock dclock; // 13
 BinaryClock bclock;
 
 LocalClock::LocalClock() {
-  layers.push_back(&snake);
   layers.push_back(&dclock);
   layers.push_back(&bclock);
   layers.push_back(&fullscreen_snake);
+
+  windows.push_back(&snake);
+  windows.push_back(&spectrumer);
 }
 
 bool LocalClock::wait() {
@@ -588,6 +632,12 @@ bool LocalClock::wait() {
 
 void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
                       int maxBr, bool *pushed, int *timeout) {
+  static bool seed = false;
+  if (!seed) {
+    random16_set_seed(ntp.getEpochTime() % UINT16_MAX);
+    seed = true;
+  }
+
   if (autoBr) {
     auto ldr = analogRead(LDR_PIN);
     static int br = 0;
@@ -598,58 +648,100 @@ void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
     }
   }
 
+  if (pushed[0] && millis() - timeout[0] < 100) {
+    if ((layout == LAYOUT_L_DIGITAL || layout == LAYOUT_R_DIGITAL) &&
+        animation_1 == 0 && animation_2 == 0) {
+      windows.push_back(windows.front());
+      windows.pop_front();
+      animation_1 = 7;
+    }
+  }
   if (pushed[1] && millis() - timeout[1] < 100) {
     frame_delay = (frame_delay + 1) % 6;
   }
   if (pushed[2] && millis() - timeout[2] < 100) {
-    if (animation_progress == 0) {
+    if (animation_1 == 0 && animation_2 == 0) {
       layout = (LayoutType)((layout + 1) % LAYOUT_MAX);
-      animation_progress = 7;
+      animation_2 = 7;
     }
   }
 
   matrix->clear();
 
-  if (animation_progress) {
-    for (auto layer : layers) {
-      if (!layer->is_hidden()) {
-        layer->loop(frame_delay);
-        auto x = layer->x();
-        auto y = layer->y() + (8 - animation_progress);
-        layer->move(x, y).render(matrix);
-      }
-    }
+  //
+  // window switching
+  if (animation_1) {
+    auto x = windows.back()->x();
+    auto y = windows.back()->y() + (8 - animation_1);
+    windows.back()->loop(frame_delay);
+    windows.back()->render(matrix, x, y);
+    windows.front()->loop(frame_delay);
+    windows.front()->render(matrix, x, y - 8);
+    dclock.loop(frame_delay);
+    dclock.Layer::render(matrix);
+    animation_1--;
+  }
 
-    switch (layout) {
+  //
+  // layout switching
+  else if (animation_2) {
+    // prev layout
+    auto prev_layout = (LayoutType)((layout + LAYOUT_MAX - 1) % LAYOUT_MAX);
+    switch (prev_layout) {
     case LAYOUT_L_DIGITAL:
-      snake.render(matrix, 18, -animation_progress);
-      dclock.render(matrix, 0, -animation_progress);
+      windows.back()->render(matrix, 18, 8 - animation_2);
+      dclock.render(matrix, 0, 8 - animation_2);
       break;
     case LAYOUT_R_DIGITAL:
-      snake.render(matrix, 0, -animation_progress);
-      dclock.render(matrix, 13, -animation_progress);
+      windows.back()->render(matrix, 0, 8 - animation_2);
+      dclock.render(matrix, 13, 8 - animation_2);
       break;
     case LAYOUT_BINARY:
-      bclock.render(matrix, 0, -animation_progress);
+      bclock.render(matrix, 0, 8 - animation_2);
       break;
     case LAYOUT_FULLSCREEN:
-      fullscreen_snake.render(matrix, -1, -1 - animation_progress);
+      fullscreen_snake.render(matrix, -1, 8 - 1 - animation_2);
       break;
     default:
       break;
     }
-    animation_progress--;
-  } else {
+
+    // current layout
+    switch (layout) {
+    case LAYOUT_L_DIGITAL:
+      windows.front()->render(matrix, 18, -animation_2);
+      dclock.render(matrix, 0, -animation_2);
+      break;
+    case LAYOUT_R_DIGITAL:
+      windows.front()->render(matrix, 0, -animation_2);
+      dclock.render(matrix, 13, -animation_2);
+      break;
+    case LAYOUT_BINARY:
+      bclock.render(matrix, 0, -animation_2);
+      break;
+    case LAYOUT_FULLSCREEN:
+      fullscreen_snake.render(matrix, -1, -1 - animation_2);
+      break;
+    default:
+      break;
+    }
+    animation_2--;
+  }
+
+  //
+  // layout switching
+  else {
+    windows.front()->hidden();
     for (auto layer : layers)
       layer->hidden();
 
     switch (layout) {
     case LAYOUT_L_DIGITAL:
-      snake.move(18, 0).show();
+      windows.front()->move(18, 0).show();
       dclock.move(0, 0).show();
       break;
     case LAYOUT_R_DIGITAL:
-      snake.move(0, 0).show();
+      windows.front()->move(0, 0).show();
       dclock.move(13, 0).show();
       break;
     case LAYOUT_BINARY:
@@ -662,6 +754,10 @@ void LocalClock::loop(FastLED_NeoMatrix *matrix, bool autoBr, int minBr,
       break;
     }
 
+    if (!windows.front()->is_hidden()) {
+      windows.front()->loop(frame_delay);
+      windows.front()->render(matrix);
+    }
     for (auto layer : layers) {
       if (!layer->is_hidden()) {
         layer->loop(frame_delay);

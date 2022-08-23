@@ -3,6 +3,7 @@
 
 #include <time.h>
 #include <vector>
+#include <list>
 
 class Layer {
   bool _hidden = false;
@@ -58,8 +59,10 @@ class LocalClock {
   void draw_binary_clock(FastLED_NeoMatrix *matrix);
 
   std::vector<Layer *> layers;
+  std::list<Layer *> windows;
 
-  int8_t animation_progress = 0;
+  int8_t animation_1 = 0;
+  int8_t animation_2 = 0;
   LayoutType layout;
 
 public:
