@@ -5,70 +5,50 @@
 #include <time.h>
 #include <vector>
 
-class Layer {
-  bool _hidden = false;
+#define GLOBAL_DELAY 20
+#define GLOBAL_DELAY_PERSEC (1000 / (GLOBAL_DELAY + 50))
+#define GLOBAL_DELAY_PERMIN ((1000 * 60) / (GLOBAL_DELAY + 50))
 
-  int8_t _pos_x = 0;
-  int8_t _pos_y = 0;
-
+class Matrix {
 public:
-  virtual void render(FastLED_NeoMatrix *matrix, int8_t x, int8_t y) = 0;
-  virtual void loop(unsigned frame_delay) {}
-  virtual bool is_hidden() { return _hidden; }
+  virtual void render(FastLED_NeoMatrix *matrix) = 0;
+  virtual void loop(FastLED_NeoMatrix *matrix) {}
+  virtual void event0(FastLED_NeoMatrix *matrix) {}
+  virtual void event1(FastLED_NeoMatrix *matrix) {}
+  virtual void event2(FastLED_NeoMatrix *matrix) {}
+};
 
-  Layer &render(FastLED_NeoMatrix *matrix) {
-    render(matrix, _pos_x, _pos_y);
-    return *this;
-  }
+class Canvas {
+public:
+  virtual void render(FastLED_NeoMatrix *matrix, int x, int y) = 0;
+  virtual void loop(FastLED_NeoMatrix *matrix) {}
+  virtual void event0(FastLED_NeoMatrix *matrix) {}
+  virtual void event1(FastLED_NeoMatrix *matrix) {}
+};
 
-  Layer &move(int8_t x, int8_t y) {
-    _pos_x = x;
-    _pos_y = y;
-    return *this;
-  }
+class Widget {
+public:
+  virtual void render(FastLED_NeoMatrix *matrix, int x, int y) = 0;
+  virtual void loop(FastLED_NeoMatrix *matrix) {}
+  virtual void event1(FastLED_NeoMatrix *matrix) {}
+};
 
-  Layer &hidden() {
-    _hidden = true;
-    return *this;
-  }
-  Layer &show() {
-    _hidden = false;
-    return *this;
-  }
-
-  int8_t x() { return _pos_x; }
-  int8_t y() { return _pos_y; }
+class Task {
+public:
+  virtual bool run(FastLED_NeoMatrix *matrix) = 0;
 };
 
 class LocalClock {
-  typedef enum {
-    LAYOUT_L_DIGITAL = 0,
-    LAYOUT_R_DIGITAL,
-    LAYOUT_BINARY,
-    LAYOUT_FULLSCREEN,
-
-    LAYOUT_MAX
-  } LayoutType;
-
-  unsigned long wait_start = 0;
-
-  unsigned frame_delay = 4;
-
-  void draw_digital_clock(FastLED_NeoMatrix *matrix);
-  void draw_binary_clock(FastLED_NeoMatrix *matrix);
-
-  std::vector<Layer *> layers;
-  std::list<Layer *> windows;
-
-  int8_t animation_1 = 0;
-  int8_t animation_2 = 0;
-  LayoutType layout;
+  Matrix *m;
 
 public:
   LocalClock();
 
-  bool wait();
+  bool wait(const char *server);
 
-  void loop(FastLED_NeoMatrix *matrix, bool autoBrightness, int minBrightness,
-            int maxBrightness, bool *pushed, int *timeout);
+  void handle(FastLED_NeoMatrix *matrix);
+
+  void event(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout);
+
+  void loop(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout);
 };

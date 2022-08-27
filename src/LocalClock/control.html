@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Awtrix Controller</title>
+    <style type="text/css">
+        .button0 {
+            background-color: #4CAF50;
+            border-radius: 20%;
+            color: white;
+            padding: 5% 5%;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <script> function btn_click(id) {
+            var t = document.createElement("form");
+            t.action = "control";
+            t.method = "post";
+            t.style.display = "none";
+            t.target = "iframe";
+            var opt = document.createElement("textarea");
+            opt.name = "id";
+            opt.value = id;
+            t.appendChild(opt);
+            document.body.appendChild(t);
+            t.submit();
+        } </script>
+    <iframe id="iframe" name="iframe" style="display:none;"></iframe>
+    <button type="button" class="button0" style="background-color: #f44336;" onclick="btn_click(0)">左按键</button>
+    <button type="button" class="button0" style="background-color: #008CBA;" onclick="btn_click(1)">中按键</button>
+    <button type="button" class="button0" style="background-color: #f44336;" onclick="btn_click(2)">右按键</button>
+</body>
+
+
+</html>

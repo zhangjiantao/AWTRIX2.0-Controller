@@ -1034,11 +1034,10 @@ void reconnect() {
   String clientId = "AWTRIXController-";
   clientId += String(random(0xffff), HEX);
 
-  if (lc.wait()) {
+  if (lc.wait(awtrix_server)) {
     hardwareAnimatedSearch(1, 28, 0);
   } else {
-    lc.loop(matrix, autoBrightness, minBrightness, maxBrightness, pushed,
-            timeoutTaster);
+    lc.loop(matrix, pushed, timeoutTaster);
   }
 
   if (client.connect(clientId.c_str(), "matrixDisconnect", 1, 0,
@@ -1425,7 +1424,7 @@ void setup() {
 
   hardwareAnimatedCheck(MsgType_Wifi, 27, 2);
 
-  delay(1000); // is needed for the dfplayer to startup
+  //delay(1000); // is needed for the dfplayer to startup
 
   // Checking periphery
   Wire.begin(I2C_SDA, I2C_SCL);
@@ -1451,12 +1450,15 @@ void setup() {
   }
 
   dfmp3.begin();
+  dfmp3.playAdvertisement(0);
+  dfmp3.setVolume(2);
+  //Serial.println(dfmp3.getVolume());
 
   if (dfmp3.isOnline()) {
     hardwareAnimatedCheck(MsgType_Audio, 29, 2);
   }
 
-  if (analogRead(LDR_PIN) > 1) {
+  if (analogRead(LDR_PIN) > 1 && 0) {
     hardwareAnimatedCheck(MsgType_LDR, 29, 2);
   }
 
@@ -1482,13 +1484,15 @@ void setup() {
   myCounter = 0;
   myCounter2 = 0;
 
-  for (int x = 32; x >= -90; x--) {
-    matrix->clear();
-    matrix->setCursor(x, 6);
-    matrix->print("Host-IP: " + String(awtrix_server) + ":" + String(Port));
-    matrix->setTextColor(matrix->Color(0, 255, 50));
-    matrix->show();
-    delay(20);
+  if (lc.wait(awtrix_server)) {
+    for (int x = 32; x >= -90; x--) {
+      matrix->clear();
+      matrix->setCursor(x, 6);
+      matrix->print("Host-IP: " + String(awtrix_server) + ":" + String(Port));
+      matrix->setTextColor(matrix->Color(0, 255, 50));
+      matrix->show();
+      delay(20);
+    }
   }
 
   client.setServer(awtrix_server, atoi(Port));
@@ -1505,7 +1509,7 @@ void loop() {
 
   // is needed for the server search animation
   if (firstStart && !ignoreServer) {
-    if (millis() - myTime > 500 && lc.wait()) {
+    if (millis() - myTime > 500 && lc.wait(awtrix_server)) {
       serverSearch(myCounter, 0, 28, 0);
       myCounter++;
       if (myCounter == 4) {
