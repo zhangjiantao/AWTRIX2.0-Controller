@@ -716,7 +716,7 @@ public:
     if (_delay)
       return false;
 
-    auto ldr = analogRead(LDR_PIN) / 3;
+    auto ldr = analogRead(LDR_PIN);
     auto update = map(ldr > 256 ? 256 : ldr, 0, 256, 4, 70);
     matrix->setBrightness(update);
     return true;
