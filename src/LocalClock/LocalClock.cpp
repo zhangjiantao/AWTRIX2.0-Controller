@@ -541,9 +541,9 @@ public:
   }
 
   void event1(FastLED_NeoMatrix *matrix) override {
-    r = random8(192) + 64;
-    g = random8(192) + 64;
-    b = random8(192) + 64;
+    r = random8(128) + 128;
+    g = random8(128) + 128;
+    b = random8(128) + 128;
   }
 };
 
@@ -591,9 +591,9 @@ public:
   }
 
   void event1(FastLED_NeoMatrix *matrix) override {
-    r = random8(192) + 64;
-    g = random8(192) + 64;
-    b = random8(192) + 64;
+    r = random8(128) + 128;
+    g = random8(128) + 128;
+    b = random8(128) + 128;
   }
 };
 
@@ -707,6 +707,159 @@ public:
   }
 };
 
+class HttpUtils {
+  HTTPClient httpClient;
+  WiFiClient wifiClient;
+  BearSSL::WiFiClientSecure httpsClient;
+
+public:
+  String httpRequest(const String &url, int &errCode) {
+    String res;
+
+    if (httpClient.begin(wifiClient, url)) { // HTTP
+      int httpCode = httpClient.GET();
+      errCode = httpCode;
+      if (httpCode > 0) {
+        if (httpCode == HTTP_CODE_OK ||
+            httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          errCode = 0;
+          res = httpClient.getString();
+        }
+      }
+      httpClient.end();
+    }
+    return res;
+  }
+};
+
+template <uint8_t h, uint8_t w> class SSEC : public Widget {
+  HttpUtils http;
+  const String api = "http://img2.money.126.net/data/hs/time/today/";
+
+  struct Index {
+    const String code;
+    unsigned min, max;
+    unsigned yestclose;
+    std::vector<unsigned> chart;
+  };
+
+  std::vector<Index> targets{{"0000001.json", 0, 0, 0, {}},
+                             {"1399001.json", 0, 0, 0, {}},
+                             {"1399006.json", 0, 0, 0, {}}};
+
+  unsigned long last_update_time = 0;
+
+  unsigned current = 0;
+
+  bool update() {
+    Index &target = targets[current];
+    int errCode = 0;
+    auto response = http.httpRequest(api + target.code, errCode);
+    if (errCode)
+      return false;
+
+    auto get_float_value = [&](const char *prefix, unsigned offset,
+                               float &result) {
+      auto p = response.indexOf(prefix);
+      if (p == -1)
+        return false;
+      p += offset;
+      auto pstr = response.c_str() + p;
+      result = strtof(pstr, nullptr);
+      return true;
+    };
+
+    // parse yestclose
+    float value;
+    get_float_value("\"yestclose\":", 12, value);
+    target.yestclose = std::round(value);
+
+    static unsigned data[243];
+    unsigned data_size = 0;
+
+    static char buff[16];
+    for (unsigned i = 930; i < 1531; i++) {
+      if (i % 100 > 59 || i == 12 || i == 1000 || i == 1400)
+        continue;
+      sprintf(buff, "[\"%04d\",", i);
+      if (get_float_value(buff, 8, value))
+        data[data_size++] = std::round(value);
+    }
+
+    Serial.printf("date size = %d\n", data_size);
+
+    target.chart.clear();
+    for (unsigned i = 24; i <= data_size; i += 24)
+      target.chart.push_back(data[i - 1]);
+
+    if (data_size % 24)
+      target.chart.push_back(data[data_size - 1]);
+
+    Serial.printf("chart size = %d\n", target.chart.size());
+
+    target.max = *std::max_element(target.chart.begin(), target.chart.end());
+    target.min = *std::min_element(target.chart.begin(), target.chart.end());
+    return true;
+  }
+
+public:
+  SSEC() {
+    for (auto &i : targets)
+      i.chart.reserve(10);
+  }
+
+  void loop(FastLED_NeoMatrix *matrix) override {
+    auto ts = ntp.getEpochTime();
+    if (ts - last_update_time < 60)
+      return;
+    last_update_time = ts;
+    if (ntp.getDay() == 0 && ntp.getDay() == 6)
+      if (!targets[current].chart.empty())
+        return;
+
+    if (ntp.getHours() < 9 || ntp.getHours() == 12 || ntp.getHours() == 13 ||
+        ntp.getHours() > 15)
+      if (!targets[current].chart.empty())
+        return;
+
+    if (ntp.getHours() == 9 && ntp.getMinutes() < 30)
+      if (!targets[current].chart.empty())
+        return;
+
+    if (ntp.getHours() == 11 && ntp.getMinutes() > 30)
+      if (!targets[current].chart.empty())
+        return;
+
+    update();
+
+    Serial.println("update succe");
+  }
+
+  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+    auto c = matrix->Color(130, 130, 130);
+    matrix->drawRect(x + 1, y + 1, w + 2, h + 2, c);
+
+    auto r = matrix->Color(255, 0, 0);
+    auto g = matrix->Color(0, 255, 0);
+    auto &target = targets[current];
+    for (int i = 0; i < target.chart.size(); i++) {
+      auto c = target.chart[i] >= target.yestclose ? r : g;
+      int v;
+      if (target.min == target.max)
+        v = 3;
+      else
+        v = map(target.chart[i], target.min, target.max, 0, 4);
+      matrix->drawPixel(x + 2 + i, y + 6 - v, c);
+    }
+  }
+
+  void event1(FastLED_NeoMatrix *matrix) override {
+    current = ++current % targets.size();
+    if (targets[current].chart.empty())
+      update();
+  }
+};
+
 class BrightnessUpdater : public Task {
   unsigned long _delay = 0;
 
@@ -744,13 +897,13 @@ public:
 
 Snake<5, 10> snake; // 10, 0
 Spectrumer<5, 10> spectrumer;
+SSEC<5, 10> Ssec;
 DigitalClock2<> dclock2; // 13
 DigitalClock3 dclock3;
 BinaryClock bclock;
 Snake<6, 30> fullscreen_snake;
 
-template <typename T, uint8_t offset, uint8_t width>
-class SwitchAnimationPlayer {
+template <typename T, uint8_t offset, uint8_t width> class EffectPlayer {
   uint8_t animation = 0;
   uint8_t n = 0;
 
@@ -798,10 +951,10 @@ public:
 template <uint8_t clock_offset, uint8_t widget_offset>
 class ClockCanvas2 : public Canvas {
   std::list<Widget *> widgets;
-  SwitchAnimationPlayer<Widget, widget_offset, 13> player;
+  EffectPlayer<Widget, widget_offset, 13> player;
 
 public:
-  ClockCanvas2() : widgets({&snake, &spectrumer}) {}
+  ClockCanvas2() : widgets({&snake, &spectrumer, &Ssec}) {}
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
     if (!player.playing())
@@ -826,7 +979,7 @@ public:
 
 class ClockCanvas1 : public Canvas {
   std::list<Widget *> widgets;
-  SwitchAnimationPlayer<Widget, 0, 32> player;
+  EffectPlayer<Widget, 0, 32> player;
 
 public:
   ClockCanvas1() : widgets({&dclock3, new DigitalClock2<true>, &bclock}) {}
@@ -854,12 +1007,16 @@ class MatrixImpl : public Matrix {
   std::list<Canvas *> canvases;
   std::vector<Task *> tasks{new BrightnessUpdater, new NTPUpdater};
 
-  SwitchAnimationPlayer<Canvas, 0, 32> player;
+  EffectPlayer<Canvas, 0, 32> player;
 
 public:
-  MatrixImpl()
-      : canvases({new ClockCanvas2<0, 18>(), new ClockCanvas1,
-                  new ClockCanvas2<13, 0>(), new ClockCanvas1}) {}
+  MatrixImpl() {
+    auto clock1 = new ClockCanvas1;
+    canvases.push_back(new ClockCanvas2<0, 18>());
+    canvases.push_back(clock1);
+    canvases.push_back(new ClockCanvas2<13, 0>());
+    canvases.push_back(clock1);
+  }
 
   void render(FastLED_NeoMatrix *matrix) override {
     if (!player.playing())
