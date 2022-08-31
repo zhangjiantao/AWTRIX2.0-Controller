@@ -40,6 +40,7 @@
 #include <list>
 #include <map>
 #include <queue>
+#include <type_traits>
 
 #define LDR_PIN A0
 
@@ -51,6 +52,13 @@ typedef DFMiniMp3<SoftwareSerial, Mp3Notify> DfMp3;
 extern DfMp3 dfmp3;
 extern WiFiManager wifiManager;
 extern ESP8266WebServer server;
+
+#define RANDOM_RGB(r, g, b)                                                    \
+  do {                                                                         \
+    r = random8(255);                                                          \
+    g = random8(255);                                                          \
+    b = random8(255);                                                          \
+  } while ((r + g + b < 256))
 
 template <uint8_t h, uint8_t w> class Snake : public Widget {
   typedef enum {
@@ -511,9 +519,7 @@ public:
       if (animation_progress == 0) {
         first_start = false;
         if (hl != ani_hl) {
-          r = random8(192) + 64;
-          g = random8(192) + 64;
-          b = random8(192) + 64;
+          RANDOM_RGB(r, g, b);
           dfmp3.playAdvertisement(0);
         }
       }
@@ -540,11 +546,7 @@ public:
     last_hh = hh;
   }
 
-  void event1(FastLED_NeoMatrix *matrix) override {
-    r = random8(128) + 128;
-    g = random8(128) + 128;
-    b = random8(128) + 128;
-  }
+  void event1(FastLED_NeoMatrix *matrix) override { RANDOM_RGB(r, g, b); }
 };
 
 class DigitalClock3 : public Widget {
@@ -576,9 +578,7 @@ public:
     auto week_b = matrix->Color(130, 130, 130);
 
     if (last_h != h && m == 0 && s == 0) {
-      r = random8(192) + 64;
-      g = random8(192) + 64;
-      b = random8(192) + 64;
+      RANDOM_RGB(r, g, b);
       dfmp3.playAdvertisement(0);
       last_h = h;
     }
@@ -590,11 +590,7 @@ public:
     }
   }
 
-  void event1(FastLED_NeoMatrix *matrix) override {
-    r = random8(128) + 128;
-    g = random8(128) + 128;
-    b = random8(128) + 128;
-  }
+  void event1(FastLED_NeoMatrix *matrix) override { RANDOM_RGB(r, g, b); }
 };
 
 class BinaryClock : public Widget {
@@ -779,7 +775,7 @@ template <uint8_t h, uint8_t w> class SSEC : public Widget {
 
     static char buff[16];
     for (unsigned i = 930; i < 1531; i++) {
-      if (i % 100 > 59 || i == 12 || i == 1000 || i == 1400)
+      if (i % 100 > 59 || i / 100 == 12)
         continue;
       sprintf(buff, "[\"%04d\",", i);
       if (get_float_value(buff, 8, value))
@@ -787,12 +783,15 @@ template <uint8_t h, uint8_t w> class SSEC : public Widget {
     }
 
     Serial.printf("date size = %d\n", data_size);
+    if (data_size == 0)
+      return false;
 
     target.chart.clear();
-    for (unsigned i = 24; i <= data_size; i += 24)
+    target.chart.push_back(data[0]);
+    for (unsigned i = 27; i <= data_size; i += 27)
       target.chart.push_back(data[i - 1]);
 
-    if (data_size % 24)
+    if (data_size % 27)
       target.chart.push_back(data[data_size - 1]);
 
     Serial.printf("chart size = %d\n", target.chart.size());
@@ -813,26 +812,26 @@ public:
     if (ts - last_update_time < 60)
       return;
     last_update_time = ts;
-    if (ntp.getDay() == 0 && ntp.getDay() == 6)
-      if (!targets[current].chart.empty())
+    auto hasdata = !targets[current].chart.empty();
+
+    if (hasdata) {
+      if (ntp.getDay() == 0 || ntp.getDay() == 6)
         return;
 
-    if (ntp.getHours() < 9 || ntp.getHours() == 12 || ntp.getHours() == 13 ||
-        ntp.getHours() > 15)
-      if (!targets[current].chart.empty())
+      if (ntp.getHours() < 9 || ntp.getHours() == 12 || ntp.getHours() > 14)
         return;
 
-    if (ntp.getHours() == 9 && ntp.getMinutes() < 30)
-      if (!targets[current].chart.empty())
+      if (ntp.getHours() == 9 && ntp.getMinutes() < 30)
         return;
 
-    if (ntp.getHours() == 11 && ntp.getMinutes() > 30)
-      if (!targets[current].chart.empty())
+      if (ntp.getHours() == 11 && ntp.getMinutes() > 30)
         return;
+    }
 
     update();
 
-    Serial.println("update succe");
+    Serial.print(ntp.getFormattedTime());
+    Serial.println(" update succe");
   }
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
@@ -905,17 +904,17 @@ Snake<6, 30> fullscreen_snake;
 
 template <typename T, uint8_t offset, uint8_t width> class EffectPlayer {
   uint8_t animation = 0;
-  uint8_t n = 0;
+  int8_t n = 0;
 
 public:
-  bool playing() { return n; }
+  bool playing() { return n > 0; }
 
   void begin(std::list<T *> &list) {
     if (playing()) {
       n = 0;
       return;
     }
-    animation = (animation + 1) % 4;
+    animation = (animation + 1) % 2;
     if (animation < 2)
       n = 8;
     else
@@ -925,43 +924,54 @@ public:
   }
 
   void render(std::list<T *> &list, FastLED_NeoMatrix *matrix, int x, int y) {
-    switch (animation) {
-    case 0:
-      list.front()->render(matrix, x + offset, y + 8 - (8 - n));
-      list.back()->render(matrix, x + offset, y - 8 + n);
-      break;
-    case 1:
-      list.front()->render(matrix, x + offset, y - 8 + (8 - n));
-      list.back()->render(matrix, x + offset, y + 8 - n);
-      break;
-    case 2:
-      list.front()->render(matrix, x + offset + width - (width - n), y);
-      list.back()->render(matrix, x + offset - width + n, y);
-      break;
-    case 3:
-      list.front()->render(matrix, x + offset - width + (width - n), y);
-      list.back()->render(matrix, x + offset + width - n, y);
-      break;
-    }
+#define EFFECT_SYNC_MODE 1
+#if EFFECT_SYNC_MODE
+    while (n >= 0) {
+      matrix->fillRect(offset, 0, width, 8, matrix->Color(0, 0, 0));
+#endif
+      switch (animation) {
+      case 0:
+        list.front()->render(matrix, x + offset, y + 8 - (8 - n));
+        list.back()->render(matrix, x + offset, y - 8 + n);
+        break;
+      case 1:
+        list.front()->render(matrix, x + offset, y - 8 + (8 - n));
+        list.back()->render(matrix, x + offset, y + 8 - n);
+        break;
+      case 2:
+        list.front()->render(matrix, x + offset + width - (width - n), y);
+        list.back()->render(matrix, x + offset - width + n, y);
+        break;
+      case 3:
+        list.front()->render(matrix, x + offset - width + (width - n), y);
+        list.back()->render(matrix, x + offset + width - n, y);
+        break;
+      }
 
-    --n;
+      n -= 1;
+#if EFFECT_SYNC_MODE
+      matrix->show();
+      delay(15);
+    }
+    n = 0;
+#endif
   }
 };
 
 template <uint8_t clock_offset, uint8_t widget_offset>
 class ClockCanvas2 : public Canvas {
   std::list<Widget *> widgets;
-  EffectPlayer<Widget, widget_offset, 13> player;
+  EffectPlayer<Widget, widget_offset, 14> player;
 
 public:
   ClockCanvas2() : widgets({&snake, &spectrumer, &Ssec}) {}
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+    dclock2.render(matrix, x + clock_offset, y);
     if (!player.playing())
       widgets.front()->render(matrix, x + widget_offset, y);
     else
       player.render(widgets, matrix, x, y);
-    dclock2.render(matrix, x + clock_offset, y);
   }
 
   void loop(FastLED_NeoMatrix *matrix) override {
