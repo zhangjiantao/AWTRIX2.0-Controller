@@ -1136,7 +1136,7 @@ void LocalClock::handle(FastLED_NeoMatrix *matrix) {
     for (int i = 0; i < server.args(); i++) {
       if (server.argName(i) == "id") {
         int id = server.arg(i).toInt();
-        if (id < 3) {
+        if (id < 3 && id >= 0) {
           pushed[id] = true;
           timeout[id] = millis();
           event(matrix, pushed, timeout);
