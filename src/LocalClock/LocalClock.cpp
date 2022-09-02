@@ -45,7 +45,7 @@
 #define LDR_PIN A0
 
 WiFiUDP ntpUDP;
-NTPClient ntp(ntpUDP, "ntp2.aliyun.com", 8 * 60 * 60, 5 * 60 * 1000);
+NTPClient ntp(ntpUDP, "ntp2.aliyun.com", 8 * 60 * 60, 24 * 60 * 60 * 1000);
 
 class Mp3Notify;
 typedef DFMiniMp3<SoftwareSerial, Mp3Notify> DfMp3;
