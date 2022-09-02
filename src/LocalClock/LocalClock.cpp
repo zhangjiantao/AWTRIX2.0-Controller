@@ -143,7 +143,7 @@ public:
           return node == n;
         });
     if (any || n.first == UNREACHABLE || n.second == UNREACHABLE) {
-      animation_progress = 6;
+      animation_progress = 7;
       // border_r = random8(110, 150);
       // border_g = random8(110, 150);
       // border_b = random8(110, 150);
@@ -356,19 +356,37 @@ public:
   }
 
   void loop(FastLED_NeoMatrix *matrix) override {
-    if (animation_progress)
+    _delay = (_delay + 1) % (frame_delay + 1);
+    if (_delay)
       return;
 
-    _delay = (_delay + 1) % (frame_delay + 1);
-    if (_delay == 0) {
-      auto nd = next_direction();
-      auto n = next_position(nd);
-      if (n.first == x && n.second == y) {
-        s.push_front({x, y});
+    if (animation_progress) {
+      animation_progress--;
+      if (animation_progress == 0) {
+        auto t = target_r;
+        target_r = target_g;
+        target_g = target_b;
+        target_b = t;
+
+        t = snake_r;
+        snake_r = snake_g;
+        snake_g = snake_b;
+        snake_b = t;
+
+        s.clear();
+        s.push_back({0, 0});
         place();
-      } else {
-        forward(nd);
       }
+      return;
+    }
+
+    auto nd = next_direction();
+    auto n = next_position(nd);
+    if (n.first == x && n.second == y) {
+      s.push_front({x, y});
+      place();
+    } else {
+      forward(nd);
     }
   }
 
@@ -389,24 +407,6 @@ public:
         draw_snake(matrix, pos_x + 2, pos_y + 2, target_r, target_g, target_b);
       else
         draw_snake(matrix, pos_x + 2, pos_y + 2, snake_r, snake_g, snake_b);
-
-      animation_progress--;
-
-      if (animation_progress == 0) {
-        auto t = target_r;
-        target_r = target_g;
-        target_g = target_b;
-        target_b = t;
-
-        t = snake_r;
-        snake_r = snake_g;
-        snake_g = snake_b;
-        snake_b = t;
-
-        s.clear();
-        s.push_back({0, 0});
-        place();
-      }
     }
   }
 
@@ -420,18 +420,17 @@ template <bool fullscreen = false> class DigitalClock2 : public Widget {
   uint8_t last_hl = 0;
   uint8_t last_mh = 0;
   uint8_t last_ml = 0;
-  bool first_start = true;
-
   uint8_t ani_hh = 0;
   uint8_t ani_hl = 0;
   uint8_t ani_mh = 0;
   uint8_t ani_ml = 0;
+  bool first_start = true;
+
   uint8_t animation_progress = 0;
 
   uint8_t r = 0;
   uint8_t g = 255;
   uint8_t b = 64;
-  uint8_t last_hr;
 
 public:
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
@@ -449,8 +448,6 @@ public:
       matrix->fillRect(x, y, 19, 8, black);
     }
 
-    // auto c = matrix->Color(0, 255, 64);
-    // auto c = matrix->Color(77, 147, 245);
     matrix->setTextColor(matrix->Color(r, g, b));
     char buf[10];
     auto ntp_s = ntp.getSeconds();
@@ -462,23 +459,25 @@ public:
     matrix->setCursor(x + offset + 1, y + 6);
     matrix->print(buf);
 
-    auto week_f = matrix->Color(230, 230, 230);
-    auto week_b = matrix->Color(130, 130, 130);
-
     if (ml != last_ml || mh != last_mh || hl != last_hl || hh != last_hh) {
       ani_ml = last_ml;
       ani_mh = last_mh;
       ani_hl = last_hl;
       ani_hh = last_hh;
-      animation_progress = 7;
+      last_ml = ml;
+      last_mh = mh;
+      last_hl = hl;
+      last_hh = hh;
+      animation_progress = 18;
     }
 
     if (animation_progress || first_start) {
       if (ml != ani_ml || first_start) {
         matrix->fillRect(x + offset + 15, y + 0, 3, 8, black);
-        matrix->setCursor(x + offset + 15, y + (7 - animation_progress) + 6);
+        matrix->setCursor(x + offset + 15,
+                          y + (6 - animation_progress / 3) + 6);
         matrix->printf("%d", ani_ml);
-        matrix->setCursor(x + offset + 15, y + (7 - animation_progress));
+        matrix->setCursor(x + offset + 15, y + (6 - animation_progress / 3));
         matrix->printf("%d", ml);
         matrix->drawRect(x + offset + 15, y + 0, 3, 1, black);
         matrix->drawRect(x + offset + 15, y + 6, 3, 2, black);
@@ -486,9 +485,10 @@ public:
 
       if (mh != ani_mh || first_start) {
         matrix->fillRect(x + offset + 11, y + 0, 3, 8, black);
-        matrix->setCursor(x + offset + 11, y + (7 - animation_progress) + 6);
+        matrix->setCursor(x + offset + 11,
+                          y + (6 - animation_progress / 3) + 6);
         matrix->printf("%d", ani_mh);
-        matrix->setCursor(x + offset + 11, y + (7 - animation_progress));
+        matrix->setCursor(x + offset + 11, y + (6 - animation_progress / 3));
         matrix->printf("%d", mh);
         matrix->drawRect(x + offset + 11, y + 0, 3, 1, black);
         matrix->drawRect(x + offset + 11, y + 6, 3, 2, black);
@@ -496,9 +496,9 @@ public:
 
       if (hl != ani_hl || first_start) {
         matrix->fillRect(x + offset + 5, y + 0, 3, 8, black);
-        matrix->setCursor(x + offset + 5, y + (7 - animation_progress) + 6);
+        matrix->setCursor(x + offset + 5, y + (6 - animation_progress / 3) + 6);
         matrix->printf("%d", ani_hl);
-        matrix->setCursor(x + offset + 5, y + (7 - animation_progress));
+        matrix->setCursor(x + offset + 5, y + (6 - animation_progress / 3));
         matrix->printf("%d", hl);
         matrix->drawRect(x + offset + 5, y + 0, 3, 1, black);
         matrix->drawRect(x + offset + 5, y + 6, 3, 2, black);
@@ -506,9 +506,9 @@ public:
 
       if (hh != ani_hh || first_start) {
         matrix->fillRect(x + offset + 1, y + 0, 3, 8, black);
-        matrix->setCursor(x + offset + 1, y + (7 - animation_progress) + 6);
+        matrix->setCursor(x + offset + 1, y + (6 - animation_progress / 3) + 6);
         matrix->printf("%d", ani_hh);
-        matrix->setCursor(x + offset + 1, y + (7 - animation_progress));
+        matrix->setCursor(x + offset + 1, y + (6 - animation_progress / 3));
         matrix->printf("%d", hh);
         matrix->drawRect(x + offset + 1, y + 0, 3, 1, black);
         matrix->drawRect(x + offset + 1, y + 6, 3, 2, black);
@@ -518,13 +518,15 @@ public:
 
       if (animation_progress == 0) {
         first_start = false;
-        if (hl != ani_hl) {
+        if (hl != last_hl) {
           RANDOM_RGB(r, g, b);
           dfmp3.playAdvertisement(0);
         }
       }
     }
 
+    auto week_f = matrix->Color(230, 230, 230);
+    auto week_b = matrix->Color(130, 130, 130);
     if (fullscreen) {
       ntp_d = ntp_d ? ntp_d : 7;
       for (int i = 1; i < 8; i++) {
@@ -539,17 +541,28 @@ public:
         matrix->drawLine(x0, y + 7, x0 + 1, y + 7, color);
       }
     }
-
-    last_ml = ml;
-    last_mh = mh;
-    last_hl = hl;
-    last_hh = hh;
   }
 
   void event1(FastLED_NeoMatrix *matrix) override { RANDOM_RGB(r, g, b); }
 };
 
 class DigitalClock3 : public Widget {
+  uint8_t last_hh = 0;
+  uint8_t last_hl = 0;
+  uint8_t last_mh = 0;
+  uint8_t last_ml = 0;
+  uint8_t last_sh = 0;
+  uint8_t last_sl = 0;
+  uint8_t ani_hh = 0;
+  uint8_t ani_hl = 0;
+  uint8_t ani_mh = 0;
+  uint8_t ani_ml = 0;
+  uint8_t ani_sh = 0;
+  uint8_t ani_sl = 0;
+  bool first_start = true;
+  bool animation = false;
+  uint8_t animation_progress = 0;
+
   uint8_t r = 0;
   uint8_t g = 255;
   uint8_t b = 64;
@@ -563,19 +576,103 @@ public:
 
     auto black = matrix->Color(0, 0, 0);
     matrix->fillRect(x, y, 32, 8, black);
-
     matrix->setTextColor(matrix->Color(r, g, b));
+
     char buf[10];
-    auto ntp_s = ntp.getSeconds();
-    auto ntp_d = ntp.getDay() ? ntp.getDay() : 7;
-    // auto blink = ntp_s % 2 ? ":" : " ";
-    auto blink = ":";
-    sprintf(buf, "%02d%s%02d%s%02d", h, blink, m, blink, s);
+    sprintf(buf, "%02d:%02d:%02d", h, m, s);
     matrix->setCursor(x + 3, y + 6);
     matrix->print(buf);
+    if (animation) {
+      auto hh = h / 10;
+      auto hl = h % 10;
+      auto mh = m / 10;
+      auto ml = m % 10;
+      auto sh = s / 10;
+      auto sl = s % 10;
 
-    auto week_f = matrix->Color(230, 230, 230);
-    auto week_b = matrix->Color(130, 130, 130);
+      if (sl != last_sl || sh != last_sh || ml != last_ml || mh != last_mh ||
+          hl != last_hl || hh != last_hh) {
+        ani_sl = last_sl;
+        ani_sh = last_sh;
+        ani_ml = last_ml;
+        ani_mh = last_mh;
+        ani_hl = last_hl;
+        ani_hh = last_hh;
+        last_sl = sl;
+        last_sh = sh;
+        last_ml = ml;
+        last_mh = mh;
+        last_hl = hl;
+        last_hh = hh;
+        animation_progress = 12;
+      }
+
+      if (animation_progress || first_start) {
+        if (sl != ani_sl || first_start) {
+          matrix->fillRect(x + 27, y + 0, 3, 8, black);
+          matrix->setCursor(x + 27, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_sl);
+          matrix->setCursor(x + 27, y + (6 - animation_progress / 2));
+          matrix->printf("%d", sl);
+          matrix->drawRect(x + 27, y + 0, 3, 1, black);
+          matrix->drawRect(x + 27, y + 6, 3, 2, black);
+        }
+
+        if (sh != ani_sh || first_start) {
+          matrix->fillRect(x + 23, y + 0, 3, 8, black);
+          matrix->setCursor(x + 23, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_sh);
+          matrix->setCursor(x + 23, y + (6 - animation_progress / 2));
+          matrix->printf("%d", sh);
+          matrix->drawRect(x + 23, y + 0, 3, 1, black);
+          matrix->drawRect(x + 23, y + 6, 3, 2, black);
+        }
+
+        if (ml != ani_ml || first_start) {
+          matrix->fillRect(x + 17, y + 0, 3, 8, black);
+          matrix->setCursor(x + 17, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_ml);
+          matrix->setCursor(x + 17, y + (6 - animation_progress / 2));
+          matrix->printf("%d", ml);
+          matrix->drawRect(x + 17, y + 0, 3, 1, black);
+          matrix->drawRect(x + 17, y + 6, 3, 2, black);
+        }
+
+        if (mh != ani_mh || first_start) {
+          matrix->fillRect(x + 13, y + 0, 3, 8, black);
+          matrix->setCursor(x + 13, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_mh);
+          matrix->setCursor(x + 13, y + (6 - animation_progress / 2));
+          matrix->printf("%d", mh);
+          matrix->drawRect(x + 13, y + 0, 3, 1, black);
+          matrix->drawRect(x + 13, y + 6, 3, 2, black);
+        }
+
+        if (hl != ani_hl || first_start) {
+          matrix->fillRect(x + 7, y + 0, 3, 8, black);
+          matrix->setCursor(x + 7, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_hl);
+          matrix->setCursor(x + 7, y + (6 - animation_progress / 2));
+          matrix->printf("%d", hl);
+          matrix->drawRect(x + 7, y + 0, 3, 1, black);
+          matrix->drawRect(x + 7, y + 6, 3, 2, black);
+        }
+
+        if (hh != ani_hh || first_start) {
+          matrix->fillRect(x + 3, y + 0, 3, 8, black);
+          matrix->setCursor(x + 3, y + (6 - animation_progress / 2) + 6);
+          matrix->printf("%d", ani_hh);
+          matrix->setCursor(x + 3, y + (6 - animation_progress / 2));
+          matrix->printf("%d", hh);
+          matrix->drawRect(x + 3, y + 0, 3, 1, black);
+          matrix->drawRect(x + 3, y + 6, 3, 2, black);
+        }
+
+        animation_progress--;
+        if (animation_progress == 0)
+          first_start = false;
+      }
+    }
 
     if (last_h != h && m == 0 && s == 0) {
       RANDOM_RGB(r, g, b);
@@ -583,6 +680,9 @@ public:
       last_h = h;
     }
 
+    auto week_f = matrix->Color(230, 230, 230);
+    auto week_b = matrix->Color(130, 130, 130);
+    auto ntp_d = ntp.getDay() ? ntp.getDay() : 7;
     for (int i = 1; i < 8; i++) {
       auto color = ntp_d == i ? week_f : week_b;
       auto x0 = x + 3 + (i - 1) * 4;
@@ -590,7 +690,10 @@ public:
     }
   }
 
-  void event1(FastLED_NeoMatrix *matrix) override { RANDOM_RGB(r, g, b); }
+  void event1(FastLED_NeoMatrix *matrix) override {
+    animation = !animation;
+    RANDOM_RGB(r, g, b);
+  }
 };
 
 class BinaryClock : public Widget {
@@ -860,14 +963,15 @@ public:
 };
 
 class BrightnessUpdater : public Task {
-  unsigned long _delay = 0;
+  unsigned long last_update = 0;
 
 public:
   bool run(FastLED_NeoMatrix *matrix) override {
-    _delay = ++_delay % (GLOBAL_DELAY_PERSEC * 5);
-    if (_delay)
+    auto ms = millis();
+    if (last_update != 0 && ms - last_update < 3000)
       return false;
 
+    last_update = ms;
     auto ldr = analogRead(LDR_PIN);
     auto update = map(ldr > 256 ? 256 : ldr, 0, 256, 4, 70);
     matrix->setBrightness(update);
@@ -876,8 +980,6 @@ public:
 };
 
 class NTPUpdater : public Task {
-  unsigned long _delay = 0;
-
 public:
   bool run(FastLED_NeoMatrix *matrix) override {
     static bool seed = false;
@@ -888,9 +990,7 @@ public:
         return true;
       }
     }
-
-    _delay = ++_delay % (GLOBAL_DELAY_PERMIN * 5);
-    return _delay == 0 ? ntp.update() : false;
+    return ntp.update();
   }
 };
 
@@ -924,7 +1024,7 @@ public:
   }
 
   void render(std::list<T *> &list, FastLED_NeoMatrix *matrix, int x, int y) {
-#define EFFECT_SYNC_MODE 1
+#define EFFECT_SYNC_MODE 0
 #if EFFECT_SYNC_MODE
     while (n >= 0) {
       matrix->fillRect(offset, 0, width, 8, matrix->Color(0, 0, 0));
@@ -951,7 +1051,7 @@ public:
       n -= 1;
 #if EFFECT_SYNC_MODE
       matrix->show();
-      delay(15);
+      delay(GLOBAL_DELAY);
     }
     n = 0;
 #endif
@@ -1052,7 +1152,7 @@ public:
 
 LocalClock::LocalClock() { m = new MatrixImpl; }
 
-bool LocalClock::wait(const char *server) {
+bool LocalClock::shoud_wait_reconnect(const char *server) {
   if (!strcmp(server, "0.0.0.0"))
     return false;
   static unsigned long wait_start = 0;
@@ -1104,12 +1204,15 @@ const char *controller_page =
     "Controller</title><style "
     "type=\"text/"
     "css\">.button0{background-color:#4CAF50;border-radius:20%;color:white;"
-    "padding:5%5%;text-align:center;text-decoration:none;display:inline-block;"
+    "padding:5%5%;text-align:center;text-decoration:none;display:inline-"
+    "block;"
     "font-size:40px}</style></head><body><script>function btn_click(id){var "
-    "t=document.createElement(\"form\");t.action=\"control\";t.method=\"post\";"
+    "t=document.createElement(\"form\");t.action=\"control\";t.method="
+    "\"post\";"
     "t.style.display=\"none\";t.target=\"iframe\";var "
     "opt=document.createElement(\"textarea\");opt.name=\"id\";opt.value=id;t."
-    "appendChild(opt);document.body.appendChild(t);t.submit()}</script><iframe "
+    "appendChild(opt);document.body.appendChild(t);t.submit()}</"
+    "script><iframe "
     "id=\"iframe\"name=\"iframe\"style=\"display:none;\"></iframe><button "
     "type=\"button\"class=\"button0\"style=\"background-color: "
     "#f44336;\"onclick=\"btn_click(0)\">左按键</button><button "

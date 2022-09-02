@@ -5,9 +5,8 @@
 #include <time.h>
 #include <vector>
 
-#define GLOBAL_DELAY 20
-#define GLOBAL_DELAY_PERSEC (1000 / (GLOBAL_DELAY + 50))
-#define GLOBAL_DELAY_PERMIN ((1000 * 60) / (GLOBAL_DELAY + 50))
+#define GLOBAL_FPS 60
+#define GLOBAL_DELAY (1000 / GLOBAL_FPS)
 
 class Matrix {
 public:
@@ -44,7 +43,7 @@ class LocalClock {
 public:
   LocalClock();
 
-  bool wait(const char *server);
+  bool shoud_wait_reconnect(const char *server);
 
   void handle(FastLED_NeoMatrix *matrix);
 

@@ -1034,20 +1034,20 @@ void reconnect() {
   String clientId = "AWTRIXController-";
   clientId += String(random(0xffff), HEX);
 
-  if (lc.wait(awtrix_server)) {
-    hardwareAnimatedSearch(1, 28, 0);
-  } else {
+  if (!lc.shoud_wait_reconnect(awtrix_server)) {
     lc.loop(matrix, pushed, timeoutTaster);
-  }
+  } else {
+    hardwareAnimatedSearch(1, 28, 0);
 
-  if (client.connect(clientId.c_str(), "matrixDisconnect", 1, 0,
-                     WiFi.localIP().toString().c_str())) {
-    // Serial.println("connected to server!");
-    client.subscribe("awtrixmatrix/#");
+    if (client.connect(clientId.c_str(), "matrixDisconnect", 1, 0,
+                       WiFi.localIP().toString().c_str())) {
+      // Serial.println("connected to server!");
+      client.subscribe("awtrixmatrix/#");
 
-    client.publish("matrixClient", "connected");
-    matrix->fillScreen(matrix->Color(0, 0, 0));
-    matrix->show();
+      client.publish("matrixClient", "connected");
+      matrix->fillScreen(matrix->Color(0, 0, 0));
+      matrix->show();
+    }
   }
 }
 
@@ -1424,7 +1424,7 @@ void setup() {
 
   hardwareAnimatedCheck(MsgType_Wifi, 27, 2);
 
-  //delay(1000); // is needed for the dfplayer to startup
+  // delay(1000); // is needed for the dfplayer to startup
 
   // Checking periphery
   Wire.begin(I2C_SDA, I2C_SCL);
@@ -1452,7 +1452,7 @@ void setup() {
   dfmp3.begin();
   dfmp3.playAdvertisement(0);
   dfmp3.setVolume(2);
-  //Serial.println(dfmp3.getVolume());
+  // Serial.println(dfmp3.getVolume());
 
   if (dfmp3.isOnline()) {
     hardwareAnimatedCheck(MsgType_Audio, 29, 2);
@@ -1484,7 +1484,7 @@ void setup() {
   myCounter = 0;
   myCounter2 = 0;
 
-  if (lc.wait(awtrix_server)) {
+  if (lc.shoud_wait_reconnect(awtrix_server)) {
     for (int x = 32; x >= -90; x--) {
       matrix->clear();
       matrix->setCursor(x, 6);
@@ -1509,7 +1509,7 @@ void loop() {
 
   // is needed for the server search animation
   if (firstStart && !ignoreServer) {
-    if (millis() - myTime > 500 && lc.wait(awtrix_server)) {
+    if (millis() - myTime > 500 && lc.shoud_wait_reconnect(awtrix_server)) {
       serverSearch(myCounter, 0, 28, 0);
       myCounter++;
       if (myCounter == 4) {
