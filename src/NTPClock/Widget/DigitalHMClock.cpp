@@ -17,6 +17,8 @@ template <bool fullscreen = false> class DigitalHMClock : public Widget {
   uint8_t ani_ml = 0;
   bool first_start = true;
 
+  uint8_t last_h = 0;
+
   uint8_t animation_progress = 0;
 
   uint8_t r = 0;
@@ -27,10 +29,13 @@ public:
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
     uint8_t offset = fullscreen ? 7 : 0;
 
-    auto hh = ntp.getHours() / 10;
-    auto hl = ntp.getHours() % 10;
-    auto mh = ntp.getMinutes() / 10;
-    auto ml = ntp.getMinutes() % 10;
+    auto h = ntp.getHours();
+    auto m = ntp.getMinutes();
+
+    auto hh = h / 10;
+    auto hl = h % 10;
+    auto mh = m / 10;
+    auto ml = m % 10;
 
     auto black = matrix->Color(0, 0, 0);
     if (fullscreen) {
@@ -44,9 +49,7 @@ public:
     auto ntp_s = ntp.getSeconds();
     auto ntp_d = ntp.getDay();
     auto blink = ntp_s % 2 ? ":" : " ";
-    auto last_h = last_hh * 10 + last_hl;
-    auto last_m = last_mh * 10 + last_ml;
-    sprintf(buf, "%02d%s%02d", last_h, blink, last_m);
+    sprintf(buf, "%02d%s%02d", last_hh * 10 + last_hl, blink, last_mh * 10 + last_ml);
     matrix->setCursor(x + offset + 1, y + 6);
     matrix->print(buf);
 
@@ -109,9 +112,10 @@ public:
 
       if (animation_progress == 0) {
         first_start = false;
-        if (hl != last_hl) {
+        if (h != last_h) {
           RANDOM_RGB(r, g, b);
           dfmp3.playAdvertisement(0);
+          last_h = h;
         }
       }
     }

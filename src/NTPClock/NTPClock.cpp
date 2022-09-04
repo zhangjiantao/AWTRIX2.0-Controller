@@ -235,14 +235,16 @@ void NTPClock::event(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout) {
   }
 
   if (pushed[1] && millis() - timeout[1] > 1900) {
-    int count = 4;
+    int count = 3;
+    auto br = FastLED.getBrightness();
+    matrix->setBrightness(30);
     while (!digitalRead(D4)) {
       matrix->clear();
       matrix->setTextColor(matrix->Color(255, 0, 255));
       matrix->setCursor(1, 6);
       if (count) {
         matrix->clear();
-        matrix->printf("REBOOT  %d", count - 1);
+        matrix->printf("REBOOT  %d", count);
         matrix->show();
       } else {
         matrix->clear();
@@ -254,6 +256,7 @@ void NTPClock::event(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout) {
       count--;
       delay(1000);
     }
+    matrix->setBrightness(br);
   }
 }
 

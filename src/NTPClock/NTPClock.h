@@ -50,7 +50,7 @@ class Widget {
 public:
   virtual void render(FastLED_NeoMatrix *matrix, int x, int y) = 0;
   virtual void loop(FastLED_NeoMatrix *matrix) {}
-  virtual bool event1(FastLED_NeoMatrix *matrix) {}
+  virtual bool event1(FastLED_NeoMatrix *matrix) { return false; }
 };
 
 class Task {
