@@ -1,4 +1,5 @@
 #include <ESP8266WebServer.h>
+#include <ESP8266WiFi.h>
 #include <FastLED.h>
 #include <FastLED_NeoMatrix.h>
 #include <SoftwareSerial.h>
@@ -10,6 +11,7 @@
 
 extern WiFiManager wifiManager;
 extern ESP8266WebServer server;
+extern ESP8266WiFiClass WiFi;
 
 #include <DFMiniMp3.h>
 class Mp3Notify;

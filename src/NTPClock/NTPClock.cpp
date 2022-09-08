@@ -61,8 +61,8 @@ std::list<Task *> *GetTaskList() {
 }
 } // namespace Registry
 
-template <typename T, uint8_t offset, uint8_t width> class EffectPlayer {
-  uint8_t animation = 0;
+template <typename T, uint8_t offset, uint8_t width, uint8_t effect_type>
+class EffectPlayer {
   int8_t n = 0;
 
 public:
@@ -73,8 +73,7 @@ public:
       n = 0;
       return;
     }
-    animation = (animation + 1) % 2;
-    if (animation < 2)
+    if (effect_type < 2)
       n = 8;
     else
       n = width;
@@ -88,7 +87,7 @@ public:
     while (n >= 0) {
       matrix->fillRect(offset, 0, width, 8, matrix->Color(0, 0, 0));
 #endif
-      switch (animation) {
+      switch (effect_type) {
       case 0:
         list->front()->render(matrix, x + offset, y + 8 - (8 - n));
         list->back()->render(matrix, x + offset, y - 8 + n);
@@ -121,17 +120,17 @@ template <uint8_t clock_offset, uint8_t widget_offset>
 class HMClockCanvas : public Canvas {
   Widget *clock;
   std::list<Widget *> *widgets;
-  EffectPlayer<Widget, widget_offset, 14> player;
+  EffectPlayer<Widget, widget_offset, 14, 3> player;
 
 public:
   HMClockCanvas(Widget *c, std::list<Widget *> *w) : clock(c), widgets(w) {}
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
-    clock->render(matrix, x + clock_offset, y);
     if (!player.playing())
       widgets->front()->render(matrix, x + widget_offset, y);
     else
       player.render(widgets, matrix, x, y);
+    clock->render(matrix, x + clock_offset, y);
   }
 
   void loop(FastLED_NeoMatrix *matrix) override {
@@ -149,7 +148,7 @@ public:
 
 class HMSClockCanvas : public Canvas {
   std::list<Widget *> *widgets;
-  EffectPlayer<Widget, 0, 32> player;
+  EffectPlayer<Widget, 0, 32, 1> player;
 
 public:
   HMSClockCanvas(std::list<Widget *> *ws) : widgets(ws) {}
@@ -176,7 +175,7 @@ public:
 class MatrixImpl : public Matrix {
   std::list<Canvas *> *canvases;
   std::list<Task *> *tasks;
-  EffectPlayer<Canvas, 0, 32> player;
+  EffectPlayer<Canvas, 0, 32, 1> player;
 
 public:
   MatrixImpl() : tasks(Registry::GetTaskList()) {

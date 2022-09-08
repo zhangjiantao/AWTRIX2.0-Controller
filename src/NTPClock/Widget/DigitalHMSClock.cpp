@@ -21,7 +21,7 @@ class HMSDigitalClock : public Widget {
   uint8_t ani_sl = 0;
   bool first_start = true;
   uint8_t animation_progress = 0;
-  uint8_t ani_speed = 0;
+  uint8_t ani_speed = 6;
 
   uint8_t r = 0;
   uint8_t g = 255;

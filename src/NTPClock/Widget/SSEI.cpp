@@ -74,7 +74,7 @@ class SSEI : public Widget {
     // parse yestclose
     float value;
     get_float_value("\"yestclose\":", 12, value);
-    target.yestclose = std::round(value);
+    target.yestclose = std::round(value * 100);
 
     static unsigned data[243];
     unsigned data_size = 0;
@@ -85,7 +85,7 @@ class SSEI : public Widget {
         continue;
       sprintf(buff, "[\"%04d\",", i);
       if (get_float_value(buff, 8, value))
-        data[data_size++] = std::round(value);
+        data[data_size++] = std::round(value * 100);
     }
 
     Serial.printf("date size = %d\n", data_size);

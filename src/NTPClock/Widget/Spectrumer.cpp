@@ -59,5 +59,5 @@ public:
   }
 };
 
-static Registry::RegisterWidget<Spectrumer<5, 10>> X;
-//static Registry::RegisterFullscreenWidget<Spectrumer<6, 30>> Y;
+// static Registry::RegisterWidget<Spectrumer<5, 10>> X;
+// static Registry::RegisterFullscreenWidget<Spectrumer<6, 30>> Y;

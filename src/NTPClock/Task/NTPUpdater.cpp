@@ -21,7 +21,7 @@ public:
         return true;
       }
     }
-    return ntp.update();
+    return WiFi.status() == WL_CONNECTED && ntp.update();
   }
 };
 

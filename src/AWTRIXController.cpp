@@ -1413,7 +1413,6 @@ void setup() {
   server.begin();
 
   if (shouldSaveConfig) {
-
     strcpy(awtrix_server, custom_awtrix_server.getValue());
     matrixType = atoi(custom_matrix_type.getValue());
     strcpy(Port, custom_port.getValue());
