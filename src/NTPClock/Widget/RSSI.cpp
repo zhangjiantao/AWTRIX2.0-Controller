@@ -46,7 +46,7 @@ public:
     if (rssi.size() == w)
       rssi.pop_front();
 
-    int i = wifi_station_get_rssi();
+    auto i = wifi_station_get_rssi();
     auto k = i < -80 ? -80 : i;
     k = k > -40 ? -40 : k;
     k += 80;
@@ -76,7 +76,7 @@ public:
     // draw rssi
     for (int i = 0; i < w; i++) {
       auto val = rssi[i];
-      auto c = matrix->Color(r[val - 1], g[val - 1], 0);
+      c = matrix->Color(r[val - 1], g[val - 1], 0);
       for (int j = 0; j < h; j++) {
         if (j < val) {
           auto pos_x = x + 2 + i - fullscreen;

@@ -147,7 +147,7 @@ public:
     }
 
     if (last_h != h && m == 0 && s == 0) {
-      RANDOM_RGB(r, g, b);
+      // RANDOM_RGB(r, g, b);
       dfmp3.playAdvertisement(0);
       last_h = h;
     }
@@ -165,7 +165,7 @@ public:
   bool event1(FastLED_NeoMatrix *matrix) override {
     ani_speed = ani_speed == 24 ? 0 : ani_speed + 6;
     RANDOM_RGB(r, g, b);
-    return true;
+    return false;
   }
 };
 

@@ -73,11 +73,12 @@ public:
     for (int col = 0; col < 12; col++) {
       auto val = frame[animation_progress][col];
       for (int ln = 0; ln < 8; ln++) {
-        if ((val >> (7 - ln)) & 1)
+        if ((val >> (7 - ln)) & 1) {
           if (reverse)
             matrix->drawPixel(x + (13 - col), y + ln, c);
           else
             matrix->drawPixel(x + col, y + ln, c);
+        }
       }
     }
   }

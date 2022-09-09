@@ -40,14 +40,17 @@ class SSEI : public Widget {
 
   struct Index {
     const String code;
-    unsigned min, max;
+    unsigned min;
+    unsigned max;
     unsigned yestclose;
     std::vector<unsigned> chart;
   };
 
-  std::vector<Index> targets{{"0000001.json", 0, 0, 0, {}},
-                             {"1399001.json", 0, 0, 0, {}},
-                             {"1399006.json", 0, 0, 0, {}}};
+  std::vector<Index> targets{
+      {"0000001.json", 0, 0, 0, {}},
+      {"1399001.json", 0, 0, 0, {}},
+      {"1399006.json", 0, 0, 0, {}},
+  };
 
   unsigned long last_update_time = 0;
 
@@ -85,7 +88,7 @@ class SSEI : public Widget {
         continue;
       sprintf(buff, "[\"%04d\",", i);
       if (get_float_value(buff, 8, value))
-        data[data_size++] = std::round(value * 100);
+        data[data_size++] = (unsigned)std::round(value * 100);
     }
 
     Serial.printf("date size = %d\n", data_size);
@@ -150,7 +153,7 @@ public:
     auto g = matrix->Color(0, 255, 0);
     auto &target = targets[current];
     for (int i = 0; i < target.chart.size(); i++) {
-      auto c = target.chart[i] >= target.yestclose ? r : g;
+      c = target.chart[i] >= target.yestclose ? r : g;
       int v;
       if (target.min == target.max)
         v = 3;

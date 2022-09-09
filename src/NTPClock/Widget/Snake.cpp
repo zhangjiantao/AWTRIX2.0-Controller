@@ -204,24 +204,24 @@ public:
     q.push(n);
     while (!q.empty()) {
       r++;
-      n = q.front();
+      auto p = q.front();
       q.pop();
 
-      if (n.second < w - 1 && map[n.first][n.second + 1] != UNREACHABLE) {
-        map[n.first][n.second + 1] = UNREACHABLE;
-        q.push({n.first, n.second + 1});
+      if (p.second < w - 1 && map[p.first][p.second + 1] != UNREACHABLE) {
+        map[p.first][p.second + 1] = UNREACHABLE;
+        q.push({p.first, p.second + 1});
       }
-      if (n.second > 0 && map[n.first][n.second - 1] != UNREACHABLE) {
-        map[n.first][n.second - 1] = UNREACHABLE;
-        q.push({n.first, n.second - 1});
+      if (p.second > 0 && map[p.first][p.second - 1] != UNREACHABLE) {
+        map[p.first][p.second - 1] = UNREACHABLE;
+        q.push({p.first, p.second - 1});
       }
-      if (n.first < h - 1 && map[n.first + 1][n.second] != UNREACHABLE) {
-        map[n.first + 1][n.second] = UNREACHABLE;
-        q.push({n.first + 1, n.second});
+      if (p.first < h - 1 && map[p.first + 1][p.second] != UNREACHABLE) {
+        map[p.first + 1][p.second] = UNREACHABLE;
+        q.push({p.first + 1, p.second});
       }
-      if (n.first > 0 && map[n.first - 1][n.second] != UNREACHABLE) {
-        map[n.first - 1][n.second] = UNREACHABLE;
-        q.push({n.first - 1, n.second});
+      if (p.first > 0 && map[p.first - 1][p.second] != UNREACHABLE) {
+        map[p.first - 1][p.second] = UNREACHABLE;
+        q.push({p.first - 1, p.second});
       }
     }
     return r;
@@ -232,7 +232,7 @@ public:
     if (n.first == UNREACHABLE || n.second == UNREACHABLE)
       return 0;
 
-    uint8_t map[h][w]{0};
+    uint8_t map[h][w]{{0}};
     for (auto &node : s)
       map[node.first][node.second] = UNREACHABLE;
 
@@ -322,7 +322,7 @@ public:
         snake_b = t;
 
         s.clear();
-        s.push_back({0, 0});
+        s.emplace_back(0, 0);
         place();
       }
       return;
@@ -346,7 +346,8 @@ public:
 
     // draw target
     c = matrix->Color(target_r, target_g, target_b);
-    matrix->drawPixel(y + pos_x + 2 - fullscreen, x + pos_y + 2 - fullscreen, c);
+    matrix->drawPixel(y + pos_x + 2 - fullscreen, x + pos_y + 2 - fullscreen,
+                      c);
 
     // draw snake
     uint8_t r, g, b;

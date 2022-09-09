@@ -2,6 +2,7 @@
 .pioenvs/
 .piolibdeps/
 .vscode/
+.idea/
 src/awtrix-conf.h
-src/awtrix-conf.h
-src/awtrix-conf.h
+cmake-build*/
+CMakeLists*

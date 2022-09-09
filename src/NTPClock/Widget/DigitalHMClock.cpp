@@ -49,7 +49,8 @@ public:
     auto ntp_s = ntp.getSeconds();
     auto ntp_d = ntp.getDay();
     auto blink = ntp_s % 2 ? ":" : " ";
-    sprintf(buf, "%02d%s%02d", last_hh * 10 + last_hl, blink, last_mh * 10 + last_ml);
+    sprintf(buf, "%02d%s%02d", last_hh * 10 + last_hl, blink,
+            last_mh * 10 + last_ml);
     matrix->setCursor(x + offset + 1, y + 6);
     matrix->print(buf);
 
@@ -113,7 +114,7 @@ public:
       if (animation_progress == 0) {
         first_start = false;
         if (h != last_h) {
-          RANDOM_RGB(r, g, b);
+          // RANDOM_RGB(r, g, b);
           dfmp3.playAdvertisement(0);
           last_h = h;
         }
@@ -140,7 +141,7 @@ public:
 
   bool event1(FastLED_NeoMatrix *matrix) override {
     RANDOM_RGB(r, g, b);
-    return true;
+    return false;
   }
 };
 

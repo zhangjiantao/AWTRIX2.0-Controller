@@ -27,8 +27,8 @@
 #include <NTPClient.h>
 // change next line to use with another board/shield
 #include <ESP8266WiFi.h>
-//#include <WiFi.h> // for WiFi shield
-//#include <WiFi101.h> // for WiFi 101 shield or MKR1000
+// #include <WiFi.h> // for WiFi shield
+// #include <WiFi101.h> // for WiFi 101 shield or MKR1000
 
 #include "NTPClock.h"
 
@@ -201,16 +201,18 @@ public:
   void event0(FastLED_NeoMatrix *matrix) override {
     canvases->front()->event0(matrix);
   }
+
   void event1(FastLED_NeoMatrix *matrix) override {
     canvases->front()->event1(matrix);
   }
+
   void event2(FastLED_NeoMatrix *matrix) override { player.begin(canvases); }
 };
 
 NTPClock::NTPClock() { m = new MatrixImpl; }
 
-bool NTPClock::shoud_wait_reconnect(const char *server) {
-  if (!strcmp(server, "0.0.0.0"))
+bool NTPClock::shoud_wait_reconnect(const char *sv) {
+  if (!strcmp(sv, "0.0.0.0"))
     return false;
   static unsigned long wait_start = 0;
   wait_start = wait_start ? wait_start : millis();
@@ -219,7 +221,8 @@ bool NTPClock::shoud_wait_reconnect(const char *server) {
   return false;
 }
 
-void NTPClock::event(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout) {
+void NTPClock::event(FastLED_NeoMatrix *matrix, const bool *pushed,
+                     const int *timeout) {
   if (pushed[0] && millis() - timeout[0] < GLOBAL_DELAY) {
     dfmp3.playAdvertisement(9);
     m->event0(matrix);

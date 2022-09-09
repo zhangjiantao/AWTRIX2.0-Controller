@@ -32,10 +32,10 @@ public:
     _delay = ++_delay % (frame_delay + 1);
     if (_delay == 0) {
       for (uint8_t i = 0; i < w; i++) {
-        int8_t r = (int8_t)random8(3) - 1;
-        value[i] += r;
+        int8_t r8 = (int8_t)random8(3) - 1;
+        value[i] += r8;
         if (value[i] > h || value[i] < 0)
-          value[i] -= r;
+          value[i] -= r8;
       }
     }
   }

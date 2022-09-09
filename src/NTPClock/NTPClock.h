@@ -26,10 +26,10 @@ extern NTPClient ntp;
 
 #define RANDOM_RGB(r, g, b)                                                    \
   do {                                                                         \
-    r = random8(255);                                                          \
-    g = random8(255);                                                          \
-    b = random8(255);                                                          \
-  } while ((r + g + b < 256))
+    (r) = random8(255);                                                        \
+    (g) = random8(255);                                                        \
+    (b) = random8(255);                                                        \
+  } while (((r) + (g) + (b) < 256))
 
 class Matrix {
 public:
@@ -65,10 +65,6 @@ std::list<Widget *> *GetWidgetList();
 std::list<Widget *> *GetFullscreenWidgetList();
 std::list<Task *> *GetTaskList();
 
-template <typename T> struct RegisterClock {
-  RegisterClock() { SetMainClock(new T); }
-};
-
 template <typename T> struct RegisterWidget {
   RegisterWidget() { GetWidgetList()->push_back(new T); }
 };
@@ -90,11 +86,11 @@ class NTPClock {
 public:
   NTPClock();
 
-  bool shoud_wait_reconnect(const char *server);
+  static bool shoud_wait_reconnect(const char *server);
 
   void handle(FastLED_NeoMatrix *matrix);
 
-  void event(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout);
+  void event(FastLED_NeoMatrix *matrix, const bool *pushed, const int *timeout);
 
   void loop(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout);
 };

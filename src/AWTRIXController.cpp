@@ -1033,7 +1033,7 @@ void reconnect() {
   String clientId = "AWTRIXController-";
   clientId += String(random(0xffff), HEX);
 
-  if (!ntpclock.shoud_wait_reconnect(awtrix_server)) {
+  if (!NTPClock::shoud_wait_reconnect(awtrix_server)) {
     ntpclock.loop(matrix, pushed, timeoutTaster);
   } else {
     hardwareAnimatedSearch(1, 28, 0);
@@ -1482,7 +1482,7 @@ void setup() {
   myCounter = 0;
   myCounter2 = 0;
 
-  if (ntpclock.shoud_wait_reconnect(awtrix_server)) {
+  if (NTPClock::shoud_wait_reconnect(awtrix_server)) {
     for (int x = 32; x >= -90; x--) {
       matrix->clear();
       matrix->setCursor(x, 6);
@@ -1508,7 +1508,7 @@ void loop() {
   // is needed for the server search animation
   if (firstStart && !ignoreServer) {
     if (millis() - myTime > 500 &&
-        ntpclock.shoud_wait_reconnect(awtrix_server)) {
+        NTPClock::shoud_wait_reconnect(awtrix_server)) {
       serverSearch(myCounter, 0, 28, 0);
       myCounter++;
       if (myCounter == 4) {
