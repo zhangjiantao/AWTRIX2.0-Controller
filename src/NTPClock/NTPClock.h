@@ -31,6 +31,9 @@ extern NTPClient ntp;
     (b) = random8(255);                                                        \
   } while (((r) + (g) + (b) < 256))
 
+#define Color565(r, g, b)                                                      \
+  (((uint16_t)((r)&0xF8) << 8) | ((uint16_t)((g)&0xFC) << 3) | ((b) >> 3))
+
 class Matrix {
 public:
   virtual void render(FastLED_NeoMatrix *matrix) = 0;

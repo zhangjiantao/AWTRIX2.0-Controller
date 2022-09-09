@@ -42,14 +42,14 @@ public:
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
     // draw border
-    auto c = matrix->Color(130, 130, 130);
+    auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1, y + 1, w + 2, h + 2, c);
 
     // draw spectrumer
     for (int i = 0; i < w; i++) {
       for (int j = 0; j < h; j++)
         if (j < value[i])
-          matrix->drawPixel(x + 2 + i, y + 6 - j, matrix->Color(r[j], g[j], 0));
+          matrix->drawPixel(x + 2 + i, y + 6 - j, Color565(r[j], g[j], 0));
     }
   }
 

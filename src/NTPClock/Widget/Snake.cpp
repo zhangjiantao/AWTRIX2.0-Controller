@@ -109,7 +109,7 @@ public:
       auto nr = map(dis, 0, s.size(), r / 3, r);
       auto ng = map(dis, 0, s.size(), g / 3, g);
       auto nb = map(dis, 0, s.size(), b / 3, b);
-      auto Color = matrix->Color(nr, ng, nb);
+      auto Color = Color565(nr, ng, nb);
       matrix->drawPixel(n->second + pos_x, n->first + pos_y, Color);
     }
   }
@@ -340,12 +340,12 @@ public:
 
   void render(FastLED_NeoMatrix *matrix, int pos_x, int pos_y) override {
     // draw border
-    auto c = matrix->Color(border_r, border_g, border_b);
+    auto c = Color565(border_r, border_g, border_b);
     matrix->drawRect(pos_x + 1 - fullscreen, pos_y + 1 - fullscreen, w + 2,
                      h + 2, c);
 
     // draw target
-    c = matrix->Color(target_r, target_g, target_b);
+    c = Color565(target_r, target_g, target_b);
     matrix->drawPixel(y + pos_x + 2 - fullscreen, x + pos_y + 2 - fullscreen,
                       c);
 

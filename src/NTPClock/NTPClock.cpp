@@ -85,7 +85,7 @@ public:
 #define EFFECT_SYNC_MODE 0
 #if EFFECT_SYNC_MODE
     while (n >= 0) {
-      matrix->fillRect(offset, 0, width, 8, matrix->Color(0, 0, 0));
+      matrix->fillRect(offset, 0, width, 8, COLOR565(0, 0, 0));
 #endif
       switch (effect_type) {
       case 0:
@@ -242,19 +242,16 @@ void NTPClock::event(FastLED_NeoMatrix *matrix, const bool *pushed,
     matrix->setBrightness(30);
     while (!digitalRead(D4)) {
       matrix->clear();
-      matrix->setTextColor(matrix->Color(255, 0, 255));
+      matrix->setTextColor(Color565(255, 0, 255));
       matrix->setCursor(1, 6);
       if (count) {
-        matrix->clear();
         matrix->printf("REBOOT  %d", count);
         matrix->show();
       } else {
-        matrix->clear();
         matrix->print("REBOOT...");
         matrix->show();
         ESP.reset();
       }
-
       count--;
       delay(1000);
     }

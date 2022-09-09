@@ -12,9 +12,9 @@ public:
     auto ntp_h = ntp.getHours();
     auto ntp_m = ntp.getMinutes();
     auto ntp_s = ntp.getSeconds();
-    auto r = matrix->Color(255, 0, 0);
-    auto g = matrix->Color(0, 255, 0);
-    auto b = matrix->Color(0, 0, 255);
+    auto r = Color565(255, 0, 0);
+    auto g = Color565(0, 255, 0);
+    auto b = Color565(0, 0, 255);
 
     if ((ntp_h / 10) & 1)
       matrix->drawRect(x + 8 + 0, y + 6, 2, 2, r);

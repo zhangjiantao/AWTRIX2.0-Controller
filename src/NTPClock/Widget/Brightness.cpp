@@ -16,6 +16,7 @@ static bool UpdateBrightness(FastLED_NeoMatrix *matrix, int b) {
     return false;
   CurrBrightness = b;
   matrix->setBrightness(CurrBrightness);
+  return true;
 }
 
 class BrightnessUpdater : public Task {
@@ -69,7 +70,7 @@ public:
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
     bool reverse = x != 0;
-    auto c = matrix->Color(255, 255, 0);
+    auto c = Color565(255, 255, 0);
     for (int col = 0; col < 12; col++) {
       auto val = frame[animation_progress][col];
       for (int ln = 0; ln < 8; ln++) {

@@ -56,10 +56,10 @@ public:
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
     // draw border
-    auto c = matrix->Color(130, 130, 130);
+    auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);
 
-    auto yellow = matrix->Color(255, 255, 0);
+    auto yellow = Color565(255, 255, 0);
 
     if (!connected) {
       auto pos_x = x + 1 + w / 2 - fullscreen;
@@ -76,7 +76,7 @@ public:
     // draw rssi
     for (int i = 0; i < w; i++) {
       auto val = rssi[i];
-      c = matrix->Color(r[val - 1], g[val - 1], 0);
+      c = Color565(r[val - 1], g[val - 1], 0);
       for (int j = 0; j < h; j++) {
         if (j < val) {
           auto pos_x = x + 2 + i - fullscreen;

@@ -146,11 +146,11 @@ public:
   }
 
   void render(FastLED_NeoMatrix *matrix, int x, int y) override {
-    auto c = matrix->Color(130, 130, 130);
+    auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);
 
-    auto r = matrix->Color(255, 0, 0);
-    auto g = matrix->Color(0, 255, 0);
+    auto r = Color565(255, 0, 0);
+    auto g = Color565(0, 255, 0);
     auto &target = targets[current];
     for (int i = 0; i < target.chart.size(); i++) {
       c = target.chart[i] >= target.yestclose ? r : g;

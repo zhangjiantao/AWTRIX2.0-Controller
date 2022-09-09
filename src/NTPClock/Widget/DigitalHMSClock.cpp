@@ -34,9 +34,9 @@ public:
     auto m = ntp.getMinutes();
     auto s = ntp.getSeconds();
 
-    auto black = matrix->Color(0, 0, 0);
+    auto black = Color565(0, 0, 0);
     matrix->fillRect(x, y, 32, 8, black);
-    matrix->setTextColor(matrix->Color(r, g, b));
+    matrix->setTextColor(Color565(r, g, b));
 
     char buf[10];
     sprintf(buf, "%02d:%02d:%02d", h, m, s);
@@ -152,8 +152,8 @@ public:
       last_h = h;
     }
 
-    auto week_f = matrix->Color(230, 230, 230);
-    auto week_b = matrix->Color(130, 130, 130);
+    auto week_f = Color565(230, 230, 230);
+    auto week_b = Color565(130, 130, 130);
     auto ntp_d = ntp.getDay() ? ntp.getDay() : 7;
     for (int i = 1; i < 8; i++) {
       auto color = ntp_d == i ? week_f : week_b;
