@@ -101,8 +101,8 @@ public:
     }
   }
 
-  void draw_snake(FastLED_NeoMatrix *matrix, uint8_t pos_x, uint8_t pos_y,
-                  uint8_t r, uint8_t g, uint8_t b) {
+  void draw_snake(uint8_t pos_x, uint8_t pos_y, uint8_t r, uint8_t g,
+                  uint8_t b) {
     // draw gradient snake
     for (auto n = s.rbegin(); n != s.rend(); n++) {
       auto dis = std::distance(s.rbegin(), n) + 1;
@@ -303,7 +303,7 @@ public:
 #endif
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
+  void loop() override {
     _delay = (_delay + 1) % (frame_delay + 1);
     if (_delay)
       return;
@@ -338,7 +338,7 @@ public:
     }
   }
 
-  void render(FastLED_NeoMatrix *matrix, int pos_x, int pos_y) override {
+  void render(int pos_x, int pos_y) override {
     // draw border
     auto c = Color565(border_r, border_g, border_b);
     matrix->drawRect(pos_x + 1 - fullscreen, pos_y + 1 - fullscreen, w + 2,
@@ -361,10 +361,10 @@ public:
       b = target_b;
     }
 
-    draw_snake(matrix, pos_x + 2 - fullscreen, pos_y + 2 - fullscreen, r, g, b);
+    draw_snake(pos_x + 2 - fullscreen, pos_y + 2 - fullscreen, r, g, b);
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     frame_delay = ++frame_delay % 8;
     return false;
   }

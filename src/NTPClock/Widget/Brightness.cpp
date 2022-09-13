@@ -10,7 +10,7 @@
 
 static bool AutoBrightness = true;
 
-static bool UpdateBrightness(FastLED_NeoMatrix *matrix, int b) {
+static bool UpdateBrightness(int b) {
   static long CurrBrightness = 0;
   if (std::abs(CurrBrightness - b) < 2)
     return false;
@@ -21,7 +21,7 @@ static bool UpdateBrightness(FastLED_NeoMatrix *matrix, int b) {
 
 class BrightnessUpdater : public Task {
 public:
-  bool run(FastLED_NeoMatrix *matrix) override {
+  bool run() override {
     if (!AutoBrightness)
       return false;
 
@@ -33,7 +33,7 @@ public:
     last_update_ms = ms;
     auto ldr = analogRead(LDR_PIN);
     auto update = map(ldr > 512 ? 512 : ldr, 0, 512, 4, 70);
-    return UpdateBrightness(matrix, update);
+    return UpdateBrightness(update);
   }
 };
 
@@ -49,7 +49,7 @@ class Brightness : public Widget {
   };
 
 public:
-  void loop(FastLED_NeoMatrix *matrix) override {
+  void loop() override {
     static unsigned frame_delay = 10;
     static unsigned _delay = 0;
     _delay = ++_delay % (frame_delay + 1);
@@ -63,12 +63,12 @@ public:
         return;
       }
 
-      UpdateBrightness(matrix, br[current]);
+      UpdateBrightness(br[current]);
       animation_progress = current;
     }
   }
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     bool reverse = x != 0;
     auto c = Color565(255, 255, 0);
     for (int col = 0; col < 12; col++) {
@@ -84,7 +84,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     current = ++current % 5;
     AutoBrightness = current == 4;
     return true;

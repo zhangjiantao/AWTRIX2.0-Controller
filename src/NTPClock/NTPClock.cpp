@@ -81,7 +81,7 @@ public:
     list->pop_front();
   }
 
-  void render(std::list<T *> *list, FastLED_NeoMatrix *matrix, int x, int y) {
+  void render(std::list<T *> *list, int x, int y) {
 #define EFFECT_SYNC_MODE 0
 #if EFFECT_SYNC_MODE
     while (n >= 0) {
@@ -89,20 +89,22 @@ public:
 #endif
       switch (effect_type) {
       case 0:
-        list->front()->render(matrix, x + offset, y + 8 - (8 - n));
-        list->back()->render(matrix, x + offset, y - 8 + n);
+        list->front()->render(x + offset, y + 8 - (8 - n));
+        list->back()->render(x + offset, y - 8 + n);
         break;
       case 1:
-        list->front()->render(matrix, x + offset, y - 8 + (8 - n));
-        list->back()->render(matrix, x + offset, y + 8 - n);
+        list->front()->render(x + offset, y - 8 + (8 - n));
+        list->back()->render(x + offset, y + 8 - n);
         break;
       case 2:
-        list->front()->render(matrix, x + offset + width - (width - n), y);
-        list->back()->render(matrix, x + offset - width + n, y);
+        list->front()->render(x + offset + width - (width - n), y);
+        list->back()->render(x + offset - width + n, y);
         break;
       case 3:
-        list->front()->render(matrix, x + offset - width + (width - n), y);
-        list->back()->render(matrix, x + offset + width - n, y);
+        list->front()->render(x + offset - width + (width - n), y);
+        list->back()->render(x + offset + width - n, y);
+        break;
+      default:
         break;
       }
 
@@ -125,24 +127,24 @@ class HMClockCanvas : public Canvas {
 public:
   HMClockCanvas(Widget *c, std::list<Widget *> *w) : clock(c), widgets(w) {}
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     if (!player.playing())
-      widgets->front()->render(matrix, x + widget_offset, y);
+      widgets->front()->render(x + widget_offset, y);
     else
-      player.render(widgets, matrix, x, y);
-    clock->render(matrix, x + clock_offset, y);
+      player.render(widgets, x, y);
+    clock->render(x + clock_offset, y);
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
-    clock->loop(matrix);
-    widgets->front()->loop(matrix);
+  void loop() override {
+    clock->loop();
+    widgets->front()->loop();
   }
 
-  void event0(FastLED_NeoMatrix *matrix) override { player.begin(widgets); }
+  void event0() override { player.begin(widgets); }
 
-  void event1(FastLED_NeoMatrix *matrix) override {
-    if (!widgets->front()->event1(matrix))
-      clock->event1(matrix);
+  void event1() override {
+    if (!widgets->front()->event1())
+      clock->event1();
   }
 };
 
@@ -151,25 +153,21 @@ class HMSClockCanvas : public Canvas {
   EffectPlayer<Widget, 0, 32, 1> player;
 
 public:
-  HMSClockCanvas(std::list<Widget *> *ws) : widgets(ws) {}
+  explicit HMSClockCanvas(std::list<Widget *> *ws) : widgets(ws) {}
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     if (!player.playing()) {
-      widgets->front()->render(matrix, x, y);
+      widgets->front()->render(x, y);
     } else {
-      player.render(widgets, matrix, x, y);
+      player.render(widgets, x, y);
     }
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
-    widgets->front()->loop(matrix);
-  }
+  void loop() override { widgets->front()->loop(); }
 
-  void event0(FastLED_NeoMatrix *matrix) override { player.begin(widgets); }
+  void event0() override { player.begin(widgets); }
 
-  void event1(FastLED_NeoMatrix *matrix) override {
-    widgets->front()->event1(matrix);
-  }
+  void event1() override { widgets->front()->event1(); }
 };
 
 class MatrixImpl : public Matrix {
@@ -186,27 +184,23 @@ public:
     canvases = new std::list<Canvas *>({LHM, HMS, RHM, HMS});
   }
 
-  void render(FastLED_NeoMatrix *matrix) override {
+  void render() override {
     if (!player.playing())
-      canvases->front()->render(matrix, 0, 0);
+      canvases->front()->render(0, 0);
     else
-      player.render(canvases, matrix, 0, 0);
+      player.render(canvases, 0, 0);
   }
 
-  void loop(FastLED_NeoMatrix *m) override {
-    canvases->front()->loop(m);
-    for_each(tasks->begin(), tasks->end(), [&](Task *t) { t->run(m); });
+  void loop() override {
+    canvases->front()->loop();
+    for_each(tasks->begin(), tasks->end(), [&](Task *t) { t->run(); });
   }
 
-  void event0(FastLED_NeoMatrix *matrix) override {
-    canvases->front()->event0(matrix);
-  }
+  void event0() override { canvases->front()->event0(); }
 
-  void event1(FastLED_NeoMatrix *matrix) override {
-    canvases->front()->event1(matrix);
-  }
+  void event1() override { canvases->front()->event1(); }
 
-  void event2(FastLED_NeoMatrix *matrix) override { player.begin(canvases); }
+  void event2() override { player.begin(canvases); }
 };
 
 NTPClock::NTPClock() { m = new MatrixImpl; }
@@ -221,19 +215,18 @@ bool NTPClock::shoud_wait_reconnect(const char *sv) {
   return false;
 }
 
-void NTPClock::event(FastLED_NeoMatrix *matrix, const bool *pushed,
-                     const int *timeout) {
+void NTPClock::event(const bool *pushed, const int *timeout) {
   if (pushed[0] && millis() - timeout[0] < GLOBAL_DELAY) {
     dfmp3.playAdvertisement(9);
-    m->event0(matrix);
+    m->event0();
   }
   if (pushed[1] && millis() - timeout[1] < GLOBAL_DELAY) {
     dfmp3.playAdvertisement(9);
-    m->event1(matrix);
+    m->event1();
   }
   if (pushed[2] && millis() - timeout[2] < GLOBAL_DELAY) {
     dfmp3.playAdvertisement(9);
-    m->event2(matrix);
+    m->event2();
   }
 
   if (pushed[1] && millis() - timeout[1] > 1900) {
@@ -281,28 +274,28 @@ const char *controller_page =
     "type=\"button\"class=\"button0\"style=\"background-color: "
     "#f44336;\"onclick=\"btn_click(2)\">右按键</button></body></html>";
 
-void NTPClock::handle(FastLED_NeoMatrix *matrix) {
+void NTPClock::handle() {
   static bool start = false;
   if (start)
     return;
 
-  server.on("/control", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", controller_page);
+  matrix_server.on("/control", HTTP_GET, []() {
+    matrix_server.sendHeader("Connection", "close");
+    matrix_server.send(200, "text/html", controller_page);
   });
 
-  server.on("/control", HTTP_POST, [&]() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/plain", "ok");
+  matrix_server.on("/control", HTTP_POST, [&]() {
+    matrix_server.sendHeader("Connection", "close");
+    matrix_server.send(200, "text/plain", "ok");
     bool pushed[3]{false, false, false};
     int timeout[3]{0, 0, 0};
-    for (int i = 0; i < server.args(); i++) {
-      if (server.argName(i) == "id") {
-        int id = server.arg(i).toInt();
+    for (int i = 0; i < matrix_server.args(); i++) {
+      if (matrix_server.argName(i) == "id") {
+        int id = matrix_server.arg(i).toInt();
         if (id < 3 && id >= 0) {
           pushed[id] = true;
           timeout[id] = millis();
-          event(matrix, pushed, timeout);
+          event(pushed, timeout);
         }
       }
     }
@@ -311,12 +304,12 @@ void NTPClock::handle(FastLED_NeoMatrix *matrix) {
   start = true;
 }
 
-void NTPClock::loop(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout) {
-  event(matrix, pushed, timeout);
-  handle(matrix);
+void NTPClock::loop(bool *pushed, int *timeout) {
+  event(pushed, timeout);
+  handle();
   matrix->clear();
-  m->render(matrix);
-  m->loop(matrix);
+  m->render();
+  m->loop();
   matrix->show();
   delay(GLOBAL_DELAY);
 }

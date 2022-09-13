@@ -121,7 +121,7 @@ public:
       i.chart.reserve(w);
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
+  void loop() override {
     auto ts = ntp.getEpochTime();
     if (ts - last_update_time < 60)
       return;
@@ -145,7 +145,7 @@ public:
     Serial.println(" update succe");
   }
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render( int x, int y) override {
     auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);
 
@@ -163,7 +163,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     current = ++current % targets.size();
     if (targets[current].chart.empty())
       update();

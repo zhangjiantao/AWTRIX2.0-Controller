@@ -12,7 +12,7 @@ NTPClient ntp(ntpUDP, "ntp2.aliyun.com", 8 * 60 * 60, 24 * 60 * 60 * 1000);
 
 class NTPUpdater : public Task {
 public:
-  bool run(FastLED_NeoMatrix *matrix) override {
+  bool run() override {
     static bool seed = false;
     if (!seed) {
       if (ntp.update()) {

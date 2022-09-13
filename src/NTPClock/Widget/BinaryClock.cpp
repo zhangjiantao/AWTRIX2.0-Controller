@@ -8,7 +8,7 @@
 
 class BinaryClock : public Widget {
 public:
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     auto ntp_h = ntp.getHours();
     auto ntp_m = ntp.getMinutes();
     auto ntp_s = ntp.getSeconds();

@@ -26,7 +26,7 @@ template <bool fullscreen = false> class DigitalHMClock : public Widget {
   uint8_t b = 64;
 
 public:
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     uint8_t offset = fullscreen ? 7 : 0;
 
     auto h = ntp.getHours();
@@ -139,7 +139,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     RANDOM_RGB(r, g, b);
     return false;
   }

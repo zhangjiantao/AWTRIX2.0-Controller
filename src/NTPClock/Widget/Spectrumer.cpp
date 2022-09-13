@@ -28,7 +28,7 @@ public:
     }
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
+  void loop() override {
     _delay = ++_delay % (frame_delay + 1);
     if (_delay == 0) {
       for (uint8_t i = 0; i < w; i++) {
@@ -40,7 +40,7 @@ public:
     }
   }
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     // draw border
     auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1, y + 1, w + 2, h + 2, c);
@@ -53,7 +53,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     frame_delay = ++frame_delay % 8;
     return false;
   }

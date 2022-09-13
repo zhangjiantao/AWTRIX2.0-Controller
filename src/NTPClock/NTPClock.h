@@ -9,9 +9,11 @@
 #include <list>
 #include <vector>
 
-extern WiFiManager wifiManager;
-extern ESP8266WebServer server;
+extern WiFiManager matrix_wifi_manager;
+extern ESP8266WebServer matrix_server;
 extern ESP8266WiFiClass WiFi;
+extern CRGB matrix_leds[256];
+extern FastLED_NeoMatrix *matrix;
 
 #include <DFMiniMp3.h>
 class Mp3Notify;
@@ -36,31 +38,31 @@ extern NTPClient ntp;
 
 class Matrix {
 public:
-  virtual void render(FastLED_NeoMatrix *matrix) = 0;
-  virtual void loop(FastLED_NeoMatrix *matrix) {}
-  virtual void event0(FastLED_NeoMatrix *matrix) {}
-  virtual void event1(FastLED_NeoMatrix *matrix) {}
-  virtual void event2(FastLED_NeoMatrix *matrix) {}
+  virtual void render() = 0;
+  virtual void loop() {}
+  virtual void event0() {}
+  virtual void event1() {}
+  virtual void event2() {}
 };
 
 class Canvas {
 public:
-  virtual void render(FastLED_NeoMatrix *matrix, int x, int y) = 0;
-  virtual void loop(FastLED_NeoMatrix *matrix) {}
-  virtual void event0(FastLED_NeoMatrix *matrix) {}
-  virtual void event1(FastLED_NeoMatrix *matrix) {}
+  virtual void render(int x, int y) = 0;
+  virtual void loop() {}
+  virtual void event0() {}
+  virtual void event1() {}
 };
 
 class Widget {
 public:
-  virtual void render(FastLED_NeoMatrix *matrix, int x, int y) = 0;
-  virtual void loop(FastLED_NeoMatrix *matrix) {}
-  virtual bool event1(FastLED_NeoMatrix *matrix) { return false; }
+  virtual void render(int x, int y) = 0;
+  virtual void loop() {}
+  virtual bool event1() { return false; }
 };
 
 class Task {
 public:
-  virtual bool run(FastLED_NeoMatrix *matrix) = 0;
+  virtual bool run() = 0;
 };
 
 namespace Registry {
@@ -91,9 +93,9 @@ public:
 
   static bool shoud_wait_reconnect(const char *server);
 
-  void handle(FastLED_NeoMatrix *matrix);
+  void handle();
 
-  void event(FastLED_NeoMatrix *matrix, const bool *pushed, const int *timeout);
+  void event(const bool *pushed, const int *timeout);
 
-  void loop(FastLED_NeoMatrix *matrix, bool *pushed, int *timeout);
+  void loop(bool *pushed, int *timeout);
 };

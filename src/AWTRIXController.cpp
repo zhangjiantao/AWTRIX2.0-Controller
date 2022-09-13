@@ -72,12 +72,12 @@ IPAddress Server;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-WiFiManager wifiManager;
+WiFiManager matrix_wifi_manager;
 
 MenueControl myMenue;
 
 // update
-ESP8266WebServer server(80);
+ESP8266WebServer matrix_server(80);
 const char *serverIndex =
     "<form method='POST' action='/update' enctype='multipart/form-data'><input "
     "type='file' name='update'><input type='submit' value='Update'></form>";
@@ -158,7 +158,7 @@ DfMp3 dfmp3(mySoftwareSerial);
 class Mp3Notify {};
 
 // Matrix Settings
-CRGB leds[256];
+CRGB matrix_leds[256];
 FastLED_NeoMatrix *matrix;
 
 static byte c1; // Last character buffer
@@ -879,7 +879,7 @@ void updateMatrix(byte payload[], int length) {
         LittleFS.end();
         delay(1000);
       }
-      wifiManager.resetSettings();
+      matrix_wifi_manager.resetSettings();
       ESP.reset();
       break;
     }
@@ -1034,7 +1034,7 @@ void reconnect() {
   clientId += String(random(0xffff), HEX);
 
   if (!NTPClock::shoud_wait_reconnect(awtrix_server)) {
-    ntpclock.loop(matrix, pushed, timeoutTaster);
+    ntpclock.loop(pushed, timeoutTaster);
   } else {
     hardwareAnimatedSearch(1, 28, 0);
 
@@ -1158,23 +1158,23 @@ void setup() {
   Serial.println(matrixType);
   switch (matrixType) {
   case 0:
-    matrix = new FastLED_NeoMatrix(leds, 32, 8,
+    matrix = new FastLED_NeoMatrix(matrix_leds, 32, 8,
                                    NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
                                        NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG);
     break;
   case 1:
     matrix =
-        new FastLED_NeoMatrix(leds, 8, 8, 4, 1,
+        new FastLED_NeoMatrix(matrix_leds, 8, 8, 4, 1,
                               NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
                                   NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE);
     break;
   case 2:
-    matrix = new FastLED_NeoMatrix(leds, 32, 8,
+    matrix = new FastLED_NeoMatrix(matrix_leds, 32, 8,
                                    NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
                                        NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG);
     break;
   default:
-    matrix = new FastLED_NeoMatrix(leds, 32, 8,
+    matrix = new FastLED_NeoMatrix(matrix_leds, 32, 8,
                                    NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
                                        NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG);
     break;
@@ -1182,76 +1182,84 @@ void setup() {
 
   switch (matrixTempCorrection) {
   case 0:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setCorrection(TypicalLEDStrip);
     break;
   case 1:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(Candle);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(Candle);
     break;
   case 2:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(Tungsten40W);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(Tungsten40W);
     break;
   case 3:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(Tungsten100W);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(Tungsten100W);
     break;
   case 4:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(Halogen);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(Halogen);
     break;
   case 5:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(CarbonArc);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(CarbonArc);
     break;
   case 6:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(HighNoonSun);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(HighNoonSun);
     break;
   case 7:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(DirectSunlight);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(DirectSunlight);
     break;
   case 8:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(OvercastSky);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(OvercastSky);
     break;
   case 9:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(ClearBlueSky);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(ClearBlueSky);
     break;
   case 10:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(WarmFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(WarmFluorescent);
     break;
   case 11:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        StandardFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(StandardFluorescent);
     break;
   case 12:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        CoolWhiteFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(CoolWhiteFluorescent);
     break;
   case 13:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        FullSpectrumFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(FullSpectrumFluorescent);
     break;
   case 14:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        GrowLightFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(GrowLightFluorescent);
     break;
   case 15:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        BlackLightFluorescent);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(BlackLightFluorescent);
     break;
   case 16:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(MercuryVapor);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(MercuryVapor);
     break;
   case 17:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(SodiumVapor);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(SodiumVapor);
     break;
   case 18:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(MetalHalide);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256).setTemperature(MetalHalide);
     break;
   case 19:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(HighPressureSodium);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(HighPressureSodium);
     break;
   case 20:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setTemperature(
-        UncorrectedTemperature);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setTemperature(UncorrectedTemperature);
     break;
   default:
-    FastLED.addLeds<NEOPIXEL, D2>(leds, 256).setCorrection(TypicalLEDStrip);
+    FastLED.addLeds<NEOPIXEL, D2>(matrix_leds, 256)
+        .setCorrection(TypicalLEDStrip);
     break;
   }
 
@@ -1294,7 +1302,7 @@ void setup() {
         LittleFS.end();
         delay(1000);
       }
-      wifiManager.resetSettings();
+      matrix_wifi_manager.resetSettings();
       ESP.reset();
     }
   }
@@ -1316,12 +1324,12 @@ void setup() {
                           LittleFS.end();
                           delay(1000);
                   }
-                  wifiManager.resetSettings();
+                  matrix_wifi_manager.resetSettings();
                   ESP.reset();
           }
           */
 
-  wifiManager.setAPStaticIPConfig(IPAddress(172, 217, 28, 1),
+  matrix_wifi_manager.setAPStaticIPConfig(IPAddress(172, 217, 28, 1),
                                   IPAddress(172, 217, 28, 1),
                                   IPAddress(255, 255, 255, 0));
   WiFiManagerParameter custom_awtrix_server("server", "AWTRIX Host",
@@ -1337,24 +1345,24 @@ void setup() {
       "<small>0: Columns; 1: Tiles; 2: Rows <br></small><br><br>");
   WiFiManagerParameter p_lineBreak_notext("<p></p>");
 
-  wifiManager.setSaveConfigCallback(saveConfigCallback);
-  wifiManager.setAPCallback(configModeCallback);
+  matrix_wifi_manager.setSaveConfigCallback(saveConfigCallback);
+  matrix_wifi_manager.setAPCallback(configModeCallback);
 
-  wifiManager.addParameter(&p_lineBreak_notext);
-  wifiManager.addParameter(&host_hint);
-  wifiManager.addParameter(&custom_awtrix_server);
-  wifiManager.addParameter(&port_hint);
-  wifiManager.addParameter(&custom_port);
-  wifiManager.addParameter(&matrix_hint);
-  wifiManager.addParameter(&custom_matrix_type);
-  wifiManager.addParameter(&p_lineBreak_notext);
+  matrix_wifi_manager.addParameter(&p_lineBreak_notext);
+  matrix_wifi_manager.addParameter(&host_hint);
+  matrix_wifi_manager.addParameter(&custom_awtrix_server);
+  matrix_wifi_manager.addParameter(&port_hint);
+  matrix_wifi_manager.addParameter(&custom_port);
+  matrix_wifi_manager.addParameter(&matrix_hint);
+  matrix_wifi_manager.addParameter(&custom_matrix_type);
+  matrix_wifi_manager.addParameter(&p_lineBreak_notext);
 
-  // wifiManager.setCustomHeadElement("<style>html{ background-color:
+  // matrix_wifi_manager.setCustomHeadElement("<style>html{ background-color:
   // #607D8B;}</style>");
 
   hardwareAnimatedSearch(0, 24, 0);
 
-  if (!wifiManager.autoConnect("AWTRIX Controller", "awtrixxx")) {
+  if (!matrix_wifi_manager.autoConnect("AWTRIX Controller", "awtrixxx")) {
     // reset and try again, or maybe put it to deep sleep
     ESP.reset();
     delay(5000);
@@ -1363,25 +1371,25 @@ void setup() {
   // is needed for only one hotpsot!
   WiFi.mode(WIFI_STA);
 
-  server.on("/", HTTP_GET, []() {
-    server.sendHeader("Connection", "close");
-    server.send(200, "text/html", serverIndex);
+  matrix_server.on("/", HTTP_GET, []() {
+    matrix_server.sendHeader("Connection", "close");
+    matrix_server.send(200, "text/html", serverIndex);
   });
 
-  server.on("/reset", HTTP_GET, []() {
-    wifiManager.resetSettings();
+  matrix_server.on("/reset", HTTP_GET, []() {
+    matrix_wifi_manager.resetSettings();
     ESP.reset();
-    server.send(200, "text/html", serverIndex);
+    matrix_server.send(200, "text/html", serverIndex);
   });
-  server.on(
+  matrix_server.on(
       "/update", HTTP_POST,
       []() {
-        server.sendHeader("Connection", "close");
-        server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+        matrix_server.sendHeader("Connection", "close");
+        matrix_server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
         ESP.restart();
       },
       []() {
-        HTTPUpload &upload = server.upload();
+        HTTPUpload &upload = matrix_server.upload();
 
         if (upload.status == UPLOAD_FILE_START) {
           Serial.setDebugOutput(true);
@@ -1401,7 +1409,7 @@ void setup() {
         } else if (upload.status == UPLOAD_FILE_END) {
           if (Update.end(true)) { // true to set the size to the current
                                   // progress
-            server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+            matrix_server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
           } else {
             Update.printError(Serial);
           }
@@ -1410,7 +1418,7 @@ void setup() {
         yield();
       });
 
-  server.begin();
+  matrix_server.begin();
 
   if (shouldSaveConfig) {
     strcpy(awtrix_server, custom_awtrix_server.getValue());
@@ -1502,7 +1510,7 @@ void setup() {
 }
 
 void loop() {
-  server.handleClient();
+  matrix_server.handleClient();
   ArduinoOTA.handle();
 
   // is needed for the server search animation

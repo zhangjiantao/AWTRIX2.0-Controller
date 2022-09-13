@@ -31,7 +31,7 @@ public:
     }
   }
 
-  void loop(FastLED_NeoMatrix *matrix) override {
+  void loop() override {
     auto s = ntp.getSeconds();
     if (s == last_sec)
       return;
@@ -54,7 +54,7 @@ public:
     rssi.push_back(val);
   }
 
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render( int x, int y) override {
     // draw border
     auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);
@@ -87,7 +87,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     last_sec = 61;
     return false;
   }

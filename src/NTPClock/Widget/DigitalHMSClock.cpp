@@ -29,7 +29,7 @@ class HMSDigitalClock : public Widget {
   uint16_t last_h = 0;
 
 public:
-  void render(FastLED_NeoMatrix *matrix, int x, int y) override {
+  void render(int x, int y) override {
     auto h = ntp.getHours();
     auto m = ntp.getMinutes();
     auto s = ntp.getSeconds();
@@ -162,7 +162,7 @@ public:
     }
   }
 
-  bool event1(FastLED_NeoMatrix *matrix) override {
+  bool event1() override {
     ani_speed = ani_speed == 24 ? 0 : ani_speed + 6;
     RANDOM_RGB(r, g, b);
     return false;
