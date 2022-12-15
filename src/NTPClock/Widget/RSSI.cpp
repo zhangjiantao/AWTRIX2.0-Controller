@@ -54,7 +54,7 @@ public:
     rssi.push_back(val);
   }
 
-  void render( int x, int y) override {
+  void render(int x, int y) override {
     // draw border
     auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);

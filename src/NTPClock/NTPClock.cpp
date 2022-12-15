@@ -205,7 +205,7 @@ public:
 
 NTPClock::NTPClock() { m = new MatrixImpl; }
 
-bool NTPClock::shoud_wait_reconnect(const char *sv) {
+bool NTPClock::should_wait_reconnect(const char *sv) {
   if (!strcmp(sv, "0.0.0.0"))
     return false;
   static unsigned long wait_start = 0;

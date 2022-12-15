@@ -91,14 +91,14 @@ class SSEI : public Widget {
         data[data_size++] = (unsigned)std::round(value * 100);
     }
 
-    Serial.printf("date size = %d\n", data_size);
+    LOG(Serial.printf("date size = %d\n", data_size));
     if (data_size == 0)
       return false;
 
     target.chart.clear();
     target.chart.push_back(data[0]);
     auto step = (242.0 / (w - 1));
-    Serial.printf("step size = %f\n", step);
+    LOG(Serial.printf("step size = %f\n", step));
     unsigned pos = 0;
     for (auto i = step; i < data_size; i += step) {
       pos = (unsigned)std::round(i);
@@ -108,7 +108,7 @@ class SSEI : public Widget {
     if (pos < data_size)
       target.chart.push_back(data[data_size - 1]);
 
-    Serial.printf("chart size = %d\n", target.chart.size());
+    LOG(Serial.printf("chart size = %d\n", target.chart.size()));
 
     target.max = *std::max_element(target.chart.begin(), target.chart.end());
     target.min = *std::min_element(target.chart.begin(), target.chart.end());
@@ -141,11 +141,10 @@ public:
 
     update();
 
-    Serial.print(ntp.getFormattedTime());
-    Serial.println(" update succe");
+    LOG(Serial.println("update succe"));
   }
 
-  void render( int x, int y) override {
+  void render(int x, int y) override {
     auto c = Color565(130, 130, 130);
     matrix->drawRect(x + 1 - fullscreen, y + 1 - fullscreen, w + 2, h + 2, c);
 

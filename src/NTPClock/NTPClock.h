@@ -23,6 +23,13 @@ extern DfMp3 dfmp3;
 #include <NTPClient.h>
 extern NTPClient ntp;
 
+#define LOG(X)                                                          \
+  do {                                                                         \
+    Serial.printf("[%s][%s:%d]: ", ntp.getFormattedTime().c_str(), __FILE__,   \
+                  __LINE__);                                                   \
+    X;                                                                         \
+  } while (0)
+
 #define GLOBAL_FPS 60
 #define GLOBAL_DELAY (1000 / GLOBAL_FPS)
 
@@ -91,7 +98,7 @@ class NTPClock {
 public:
   NTPClock();
 
-  static bool shoud_wait_reconnect(const char *server);
+  static bool should_wait_reconnect(const char *server);
 
   void handle();
 
