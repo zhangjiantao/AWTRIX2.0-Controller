@@ -23,7 +23,7 @@ extern DfMp3 dfmp3;
 #include <NTPClient.h>
 extern NTPClient ntp;
 
-#define LOG(X)                                                          \
+#define LOG(X)                                                                 \
   do {                                                                         \
     Serial.printf("[%s][%s:%d]: ", ntp.getFormattedTime().c_str(), __FILE__,   \
                   __LINE__);                                                   \
@@ -78,11 +78,23 @@ std::list<Widget *> *GetFullscreenWidgetList();
 std::list<Task *> *GetTaskList();
 
 template <typename T> struct RegisterWidget {
-  RegisterWidget() { GetWidgetList()->push_back(new T); }
+  RegisterWidget(bool First = false) {
+    if (First) {
+      GetWidgetList()->push_front(new T);
+    } else {
+      GetWidgetList()->push_back(new T);
+    }
+  }
 };
 
 template <typename T> struct RegisterFullscreenWidget {
-  RegisterFullscreenWidget() { GetFullscreenWidgetList()->push_back(new T); }
+  RegisterFullscreenWidget(bool First = false) {
+    if (First) {
+      GetFullscreenWidgetList()->push_front(new T);
+    } else {
+      GetFullscreenWidgetList()->push_back(new T);
+    }
+  }
 };
 
 template <typename T> struct RegisterTask {

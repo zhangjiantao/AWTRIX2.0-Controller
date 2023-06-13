@@ -1330,8 +1330,8 @@ void setup() {
           */
 
   matrix_wifi_manager.setAPStaticIPConfig(IPAddress(172, 217, 28, 1),
-                                  IPAddress(172, 217, 28, 1),
-                                  IPAddress(255, 255, 255, 0));
+                                          IPAddress(172, 217, 28, 1),
+                                          IPAddress(255, 255, 255, 0));
   WiFiManagerParameter custom_awtrix_server("server", "AWTRIX Host",
                                             awtrix_server, 16);
   WiFiManagerParameter custom_port("Port", "Matrix Port", Port, 6);
@@ -1362,8 +1362,16 @@ void setup() {
 
   hardwareAnimatedSearch(0, 24, 0);
 
+  // skip hotspot mode
+  if (matrix_wifi_manager.getWiFiIsSaved()) {
+    Serial.println("has saved ssid, skip hotspot mode");
+    matrix_wifi_manager.setEnableConfigPortal(false);
+  }
+
   if (!matrix_wifi_manager.autoConnect("AWTRIX Controller", "awtrixxx")) {
     // reset and try again, or maybe put it to deep sleep
+    Serial.println("failed connect wifi, reset");
+    delay(5000);
     ESP.reset();
     delay(5000);
   }
@@ -1385,7 +1393,8 @@ void setup() {
       "/update", HTTP_POST,
       []() {
         matrix_server.sendHeader("Connection", "close");
-        matrix_server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+        matrix_server.send(200, "text/plain",
+                           (Update.hasError()) ? "FAIL" : "OK");
         ESP.restart();
       },
       []() {
@@ -1409,7 +1418,8 @@ void setup() {
         } else if (upload.status == UPLOAD_FILE_END) {
           if (Update.end(true)) { // true to set the size to the current
                                   // progress
-            matrix_server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+            matrix_server.send(200, "text/plain",
+                               (Update.hasError()) ? "FAIL" : "OK");
           } else {
             Update.printError(Serial);
           }

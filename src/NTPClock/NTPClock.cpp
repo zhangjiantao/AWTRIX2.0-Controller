@@ -181,7 +181,7 @@ public:
     auto LHM = new HMClockCanvas<0, 18>(c, Registry::GetWidgetList());
     auto RHM = new HMClockCanvas<13, 0>(c, Registry::GetWidgetList());
     auto HMS = new HMSClockCanvas(Registry::GetFullscreenWidgetList());
-    canvases = new std::list<Canvas *>({LHM, HMS, RHM, HMS});
+    canvases = new std::list<Canvas *>({HMS, LHM, HMS, RHM});
   }
 
   void render() override {

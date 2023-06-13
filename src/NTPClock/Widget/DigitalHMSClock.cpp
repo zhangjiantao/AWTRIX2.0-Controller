@@ -169,4 +169,4 @@ public:
   }
 };
 
-static Registry::RegisterFullscreenWidget<HMSDigitalClock> X;
+static Registry::RegisterFullscreenWidget<HMSDigitalClock> X(true);
