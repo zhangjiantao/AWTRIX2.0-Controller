@@ -13,7 +13,8 @@
 #define HOSTNAME "llvm.duckdns.org"
 #define IP_API "http://ip.3322.net/"
 #define UPDATE_API                                                             \
-  "http://www.duckdns.org/update?domains=llvm&verbose=true&token=54d696ca-7d9a-4633-97be-2fd4e9fb875f"
+  "http://www.duckdns.org/"                                                    \
+  "update?domains=llvm&token=54d696ca-7d9a-4633-97be-2fd4e9fb875f&ip="
 
 class HttpUtils {
   HTTPClient httpClient;
@@ -24,11 +25,6 @@ public:
     String res;
 
     if (httpClient.begin(wifiClient, url)) {
-      // httpClient.addHeader("Accept", "text/html,application/xhtml+xml");
-      httpClient.addHeader("Connection", "keep-alive");
-      httpClient.addHeader("Host", "www.duckdns.org");
-      // httpClient.addHeader("User-Agent", "Mozilla/5.0");
-
       int httpCode = httpClient.GET();
       errCode = httpCode;
       res = httpClient.getString();
@@ -45,19 +41,19 @@ public:
 };
 
 class DDNS_TASK : public Task {
-  HttpUtils http;
+  HttpUtils http, http2;
 
   bool update() {
     if (!WiFi.isConnected())
       return false;
 
     int errCode = 0;
-    // l_ip = http.httpRequest(IP_API, errCode);
-    // l_ip.trim();
-    // if (errCode) {
-    //   LOG(Serial.println("can not get current ip"));
-    //   return false;
-    // }
+    l_ip = http.httpRequest(IP_API, errCode);
+    l_ip.trim();
+    if (errCode) {
+      LOG(Serial.println("can not get current ip"));
+      return false;
+    }
 
     IPAddress resolve_ip;
     if (!WiFi.hostByName(HOSTNAME, resolve_ip, 1000)) {
@@ -72,14 +68,15 @@ class DDNS_TASK : public Task {
 
     if (l_ip != r_ip) {
       LOG(Serial.printf("update from %s to %s\n", r_ip.c_str(), l_ip.c_str()));
-      auto res = http.httpRequest(String(UPDATE_API) , errCode);
+      auto res = http2.httpRequest(String(UPDATE_API) + l_ip, errCode);
       res.trim();
-      if (errCode != 0 ||
-          (!res.startsWith("OK"))) {
+      if (errCode != 0 || (!res.startsWith("OK"))) {
         LOG(Serial.printf("failed, code %d, res %s\n", errCode, res.c_str()));
         return false;
       }
       LOG(Serial.println("done"));
+    } else {
+      LOG(Serial.printf("no update needed\n"));
     }
     return true;
   }
@@ -127,7 +124,8 @@ public:
     _delay = ++_delay % (frame_delay + 1);
     if (_delay == 0) {
       auto ts = ntp.getEpochTime();
-      update_progress = 32 - ((DDNS_TASK::next_update_ts - ts) / DDNS_UPDATE_TIME);
+      update_progress =
+          32 - ((DDNS_TASK::next_update_ts - ts) / DDNS_UPDATE_TIME);
       if (update_progress == 0) {
         animation_progress = 0;
         animation_color = DDNS_TASK::last_update_succ ? c_succe : c_error;
@@ -151,10 +149,10 @@ public:
     char buff[64];
     int16_t x1, y1;
     uint16_t w, h;
-    snprintf(buff, 64, "%s -> %s", DDNS_TASK::r_ip.c_str(),
+    snprintf(buff, 64, "%s -> %s    ", DDNS_TASK::r_ip.c_str(),
              DDNS_TASK::l_ip.c_str());
     matrix->getTextBounds(buff, 0, 0, &x1, &y1, &w, &h);
-    matrix->printf("%s -> %s", DDNS_TASK::r_ip.c_str(),
+    matrix->printf("%s -> %s    ", DDNS_TASK::r_ip.c_str(),
                    DDNS_TASK::l_ip.c_str());
 
     if (animation_progress > w)
