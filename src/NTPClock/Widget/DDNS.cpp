@@ -10,12 +10,10 @@
 #include "../NTPClock.h"
 
 #define DDNS_UPDATE_TIME 2
-#define HOSTNAME "llvm.x3322.net"
-#define AUTH_NAME "Authorization"
-#define AUTH_VALUE "Basic cm9vdDp6aGFuZ2ppYW50YW8="
+#define HOSTNAME "llvm.duckdns.org"
 #define IP_API "http://ip.3322.net/"
 #define UPDATE_API                                                             \
-  "http://members.3322.net/dyndns/update?hostname=" HOSTNAME "&myip="
+  "http://www.duckdns.org/update?domains=llvm&verbose=true&token=54d696ca-7d9a-4633-97be-2fd4e9fb875f"
 
 class HttpUtils {
   HTTPClient httpClient;
@@ -26,16 +24,18 @@ public:
     String res;
 
     if (httpClient.begin(wifiClient, url)) {
-      if (auth)
-        httpClient.addHeader(AUTH_NAME, AUTH_VALUE);
+      // httpClient.addHeader("Accept", "text/html,application/xhtml+xml");
+      httpClient.addHeader("Connection", "keep-alive");
+      httpClient.addHeader("Host", "www.duckdns.org");
+      // httpClient.addHeader("User-Agent", "Mozilla/5.0");
 
       int httpCode = httpClient.GET();
       errCode = httpCode;
+      res = httpClient.getString();
       if (httpCode > 0) {
         if (httpCode == HTTP_CODE_OK ||
             httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
           errCode = 0;
-          res = httpClient.getString();
         }
       }
       httpClient.end();
@@ -52,12 +52,12 @@ class DDNS_TASK : public Task {
       return false;
 
     int errCode = 0;
-    l_ip = http.httpRequest(IP_API, errCode);
-    l_ip.trim();
-    if (errCode) {
-      LOG(Serial.println("can not get current ip"));
-      return false;
-    }
+    // l_ip = http.httpRequest(IP_API, errCode);
+    // l_ip.trim();
+    // if (errCode) {
+    //   LOG(Serial.println("can not get current ip"));
+    //   return false;
+    // }
 
     IPAddress resolve_ip;
     if (!WiFi.hostByName(HOSTNAME, resolve_ip, 1000)) {
@@ -72,10 +72,10 @@ class DDNS_TASK : public Task {
 
     if (l_ip != r_ip) {
       LOG(Serial.printf("update from %s to %s\n", r_ip.c_str(), l_ip.c_str()));
-      auto res = http.httpRequest(String(UPDATE_API) + l_ip, errCode, true);
+      auto res = http.httpRequest(String(UPDATE_API) , errCode);
       res.trim();
       if (errCode != 0 ||
-          (!res.startsWith("good") && !res.startsWith("nochg"))) {
+          (!res.startsWith("OK"))) {
         LOG(Serial.printf("failed, code %d, res %s\n", errCode, res.c_str()));
         return false;
       }
