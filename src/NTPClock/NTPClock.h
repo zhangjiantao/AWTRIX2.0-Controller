@@ -41,10 +41,11 @@ extern NTPClient ntp;
   } while (((r) + (g) + (b) < 256))
 
 #define Color565(r, g, b)                                                      \
-  (((uint16_t)((r)&0xF8) << 8) | ((uint16_t)((g)&0xFC) << 3) | ((b) >> 3))
+  (((uint16_t)((r) & 0xF8) << 8) | ((uint16_t)((g) & 0xFC) << 3) | ((b) >> 3))
 
 class Matrix {
 public:
+  virtual ~Matrix() = default;
   virtual void render() = 0;
   virtual void loop() {}
   virtual void event0() {}
@@ -54,6 +55,7 @@ public:
 
 class Canvas {
 public:
+  virtual ~Canvas() = default;
   virtual void render(int x, int y) = 0;
   virtual void loop() {}
   virtual void event0() {}
@@ -62,6 +64,7 @@ public:
 
 class Widget {
 public:
+  virtual ~Widget() = default;
   virtual void render(int x, int y) = 0;
   virtual void loop() {}
   virtual bool event1() { return false; }
@@ -69,6 +72,7 @@ public:
 
 class Task {
 public:
+  virtual ~Task() = default;
   virtual bool run() = 0;
 };
 

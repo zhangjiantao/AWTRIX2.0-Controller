@@ -1306,32 +1306,11 @@ void setup() {
       ESP.reset();
     }
   }
-  /*
-          if (drd.detect())
-          {
-                  //Serial.println("** Double reset boot **");
-                  matrix->clear();
-                  matrix->setTextColor(matrix->Color(255, 0, 0));
-                  matrix->setCursor(6, 6);
-                  matrix->print("RESET!");
-                  matrix->show();
-                  delay(1000);
-                  if (LittleFS.begin())
-                  {
-                          delay(1000);
-                          LittleFS.remove("/awtrix.json");
 
-                          LittleFS.end();
-                          delay(1000);
-                  }
-                  matrix_wifi_manager.resetSettings();
-                  ESP.reset();
-          }
-          */
-
-  matrix_wifi_manager.setAPStaticIPConfig(IPAddress(172, 217, 28, 1),
-                                          IPAddress(172, 217, 28, 1),
-                                          IPAddress(255, 255, 255, 0));
+  auto ip = IPAddress(172, 217, 28, 1);
+  auto gw = IPAddress(172, 217, 28, 1);
+  auto sn = IPAddress(255, 255, 255, 0);
+  matrix_wifi_manager.setAPStaticIPConfig(ip, gw, sn);
   WiFiManagerParameter custom_awtrix_server("server", "AWTRIX Host",
                                             awtrix_server, 16);
   WiFiManagerParameter custom_port("Port", "Matrix Port", Port, 6);
@@ -1357,8 +1336,8 @@ void setup() {
   matrix_wifi_manager.addParameter(&custom_matrix_type);
   matrix_wifi_manager.addParameter(&p_lineBreak_notext);
 
-  // matrix_wifi_manager.setCustomHeadElement("<style>html{ background-color:
-  // #607D8B;}</style>");
+  matrix_wifi_manager.setCustomHeadElement(
+      "<style>html{ background-color:#607D8B;}</style>");
 
   hardwareAnimatedSearch(0, 24, 0);
 
