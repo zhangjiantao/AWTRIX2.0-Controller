@@ -10,11 +10,19 @@
 #include "../NTPClock.h"
 
 #define DDNS_UPDATE_TIME 2
-#define HOSTNAME "llvm.duckdns.org"
+
+#define DUCKDNS_HOSTNAME "llvm.duckdns.org"
 #define IP_API "http://ip.3322.net/"
-#define UPDATE_API                                                             \
+#define DUCKDNS_API                                                            \
   "http://www.duckdns.org/"                                                    \
-  "update?domains=llvm&token=54d696ca-7d9a-4633-97be-2fd4e9fb875f&ip="
+  "update?domains=llvm&token=54d696ca-7d9a-4633-97be-2fd4e9fb875f"
+
+#define CLOUDNS_HOSTNAME "llvm.abrdns.com"
+#define CLOUDNS_API                                                            \
+  "http://ipv4.cloudns.net/api/dynamicURL/"                                    \
+  "?q="                                                                        \
+  "MTIxMjYyMTc6NzQ2NDIxMDk3OjZkMWI1MWFmNGY4Y2M1MjNiYTc1MGQxMzJkZjljYzdiMzdiMm" \
+  "ZlZWFiNTI1ZmQwZjEyMGUyZDRhYzVlOWU5ZTY"
 
 class HttpUtils {
   HTTPClient httpClient;
@@ -40,55 +48,52 @@ public:
   }
 };
 
+HttpUtils http;
+
 class DDNS_TASK : public Task {
-  HttpUtils http, http2;
-
-  bool update() {
-    if (!WiFi.isConnected())
-      return false;
-
-    int errCode = 0;
-    l_ip = http.httpRequest(IP_API, errCode);
-    l_ip.trim();
-    if (errCode) {
-      LOG(Serial.println("can not get current ip"));
-      return false;
-    }
-
+  static String resolve(const char *host) {
     IPAddress resolve_ip;
-    if (!WiFi.hostByName(HOSTNAME, resolve_ip, 1000)) {
+    if (!WiFi.hostByName(host, resolve_ip, 1000)) {
       LOG(Serial.println("resolve hostname failed"));
+      return "";
+    }
+    return resolve_ip.toString();
+  }
+
+  static bool update_api(const char *api) {
+    int errCode = 0;
+
+    auto res = http.httpRequest(api, errCode);
+    res.trim();
+    if (errCode != 0 || (!res.startsWith("OK"))) {
+      LOG(Serial.printf("failed, code %d, res %s\n", errCode, res.c_str()));
       return false;
     }
+    LOG(Serial.println("done"));
+    return true;
+  }
 
-    r_ip = resolve_ip.toString();
-    LOG(Serial.printf("resolve %s: %s\n", HOSTNAME, r_ip.c_str()));
-    if (r_ip == "255.255.255.255")
+  static bool update(const String &wan, const char *host, const char *api) {
+    String rip = resolve(host);
+    if (rip.isEmpty() || rip == "255.255.255.255")
       return false;
 
-    if (l_ip != r_ip) {
-      LOG(Serial.printf("update from %s to %s\n", r_ip.c_str(), l_ip.c_str()));
-      auto res = http2.httpRequest(String(UPDATE_API) + l_ip, errCode);
-      res.trim();
-      if (errCode != 0 || (!res.startsWith("OK"))) {
-        LOG(Serial.printf("failed, code %d, res %s\n", errCode, res.c_str()));
-        return false;
-      }
-      LOG(Serial.println("done"));
-    } else {
-      LOG(Serial.printf("no update needed\n"));
-    }
+    if (wan != rip)
+      return update_api(api);
+    LOG(Serial.printf("no update needed\n"));
     return true;
   }
 
 public:
-  static String r_ip, l_ip;
   static unsigned long next_update_ts;
-  static bool last_update_succ;
+  static bool duckdns_ok, cloudns_ok;
 
   bool run() override {
+    if (!WiFi.isConnected())
+      return false;
     if (!ntp.isTimeSet())
       return false;
+
     auto ts = ntp.getEpochTime();
     if (next_update_ts == 0)
       next_update_ts = ts;
@@ -96,16 +101,27 @@ public:
       next_update_ts += DDNS_UPDATE_TIME * 32;
       LOG(Serial.printf("ts %lu\n", ts));
       LOG(Serial.printf("next_update_ts %lu\n", next_update_ts));
-      last_update_succ = update();
-      return last_update_succ;
+
+      int err = 0;
+
+      String wan = http.httpRequest(IP_API, err);
+      wan.trim();
+      if (err) {
+        LOG(Serial.println("can not get current ip"));
+        return false;
+      }
+
+      duckdns_ok = update(wan, DUCKDNS_HOSTNAME, DUCKDNS_API);
+      cloudns_ok = update(wan, CLOUDNS_HOSTNAME, CLOUDNS_API);
+      return duckdns_ok && cloudns_ok;
     }
     return false;
   }
 };
 
-String DDNS_TASK::r_ip{"undefined"}, DDNS_TASK::l_ip{"undefined"};
 unsigned long DDNS_TASK::next_update_ts = 0;
-bool DDNS_TASK::last_update_succ = false;
+bool DDNS_TASK::duckdns_ok = false;
+bool DDNS_TASK::cloudns_ok = false;
 
 class DDNS : public Widget {
   uint16_t c_succe = Color565(0, 255, 64);
@@ -128,7 +144,9 @@ public:
           32 - ((DDNS_TASK::next_update_ts - ts) / DDNS_UPDATE_TIME);
       if (update_progress == 0) {
         animation_progress = 0;
-        animation_color = DDNS_TASK::last_update_succ ? c_succe : c_error;
+        animation_color = (DDNS_TASK::duckdns_ok && DDNS_TASK::cloudns_ok)
+                              ? c_succe
+                              : c_error;
       } else {
         animation_progress++;
       }
@@ -149,11 +167,10 @@ public:
     char buff[64];
     int16_t x1, y1;
     uint16_t w, h;
-    snprintf(buff, 64, "%s -> %s    ", DDNS_TASK::r_ip.c_str(),
-             DDNS_TASK::l_ip.c_str());
+    snprintf(buff, 64, "DUCKDNS %d CLOUDNS %d     ", DDNS_TASK::duckdns_ok,
+             DDNS_TASK::cloudns_ok);
     matrix->getTextBounds(buff, 0, 0, &x1, &y1, &w, &h);
-    matrix->printf("%s -> %s    ", DDNS_TASK::r_ip.c_str(),
-                   DDNS_TASK::l_ip.c_str());
+    matrix->print(buff);
 
     if (animation_progress > w)
       animation_progress = 0;
