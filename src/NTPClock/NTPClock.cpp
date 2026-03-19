@@ -286,7 +286,9 @@ const char *method_close =
     "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
     "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
 
-class HttpUtils {
+int wakeup_status = 0;
+
+class WakeUpTool {
   HTTPClient httpClient;
   WiFiClient wifiClient;
 
@@ -295,7 +297,8 @@ public:
     String res;
     int httpCode;
 
-    if (httpClient.begin(wifiClient, "192.168.31.238", 8081, "/zeroconf/switch")) {
+    if (httpClient.begin(wifiClient, "192.168.31.238", 8081,
+                         "/zeroconf/switch")) {
       if (open) {
         httpCode = httpClient.POST(method_open);
       } else {
@@ -316,9 +319,26 @@ public:
   }
 };
 
-HttpUtils httpx;
+WakeUpTool wake_up_tool;
 
 void NTPClock::handle() {
+  int errCode = 0;
+  switch (wakeup_status) {
+  case 0:
+    break;
+  case 1: {
+    wake_up_tool.sendCommand(true, errCode);
+    wakeup_status = errCode == 0 ? 2 : 1;
+  } break;
+  case 20: {
+    wake_up_tool.sendCommand(false, errCode);
+    wakeup_status = errCode == 0 ? 0 : 20;
+  } break;
+  default:
+    wakeup_status++;
+    break;
+  }
+
   static bool start = false;
   if (start)
     return;
@@ -343,16 +363,12 @@ void NTPClock::handle() {
           matrix_server.send(200, "text/plain", "ok");
         }
         if (id == 3) {
-          int errCode = 0;
-          auto res = httpx.sendCommand(true, errCode);
-          res.trim();
-          matrix_server.send(200, "text/plain", String(errCode) + res);
+          if (wakeup_status == 0)
+            wakeup_status = 1;
+          matrix_server.send(200, "text/plain", String(wakeup_status));
         }
         if (id == 4) {
-          int errCode = 0;
-          auto res = httpx.sendCommand(false, errCode);
-          res.trim();
-          matrix_server.send(200, "text/plain", String(errCode) + res);
+          matrix_server.send(200, "text/plain", String(wakeup_status));
         }
       }
     }
