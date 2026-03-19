@@ -257,22 +257,66 @@ const char *controller_page =
     "Controller</title><style "
     "type=\"text/"
     "css\">.button0{background-color:#4CAF50;border-radius:20%;color:white;"
-    "padding:5%5%;text-align:center;text-decoration:none;display:inline-"
-    "block;"
+    "padding:5%5%;text-align:center;text-decoration:none;display:inline-block;"
     "font-size:40px}</style></head><body><script>function btn_click(id){var "
-    "t=document.createElement(\"form\");t.action=\"control\";t.method="
-    "\"post\";"
+    "t=document.createElement(\"form\");t.action=\"control\";t.method=\"post\";"
     "t.style.display=\"none\";t.target=\"iframe\";var "
     "opt=document.createElement(\"textarea\");opt.name=\"id\";opt.value=id;t."
-    "appendChild(opt);document.body.appendChild(t);t.submit()}</"
-    "script><iframe "
+    "appendChild(opt);document.body.appendChild(t);t.submit()}</script><iframe "
     "id=\"iframe\"name=\"iframe\"style=\"display:none;\"></iframe><button "
     "type=\"button\"class=\"button0\"style=\"background-color: "
     "#f44336;\"onclick=\"btn_click(0)\">左按键</button><button "
     "type=\"button\"class=\"button0\"style=\"background-color: "
     "#008CBA;\"onclick=\"btn_click(1)\">中按键</button><button "
     "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#f44336;\"onclick=\"btn_click(2)\">右按键</button></body></html>";
+    "#f44336;\"onclick=\"btn_click(2)\">右按键</button><button "
+    "type=\"button\"class=\"button0\"style=\"background-color: "
+    "#f44336;\"onclick=\"btn_click(3)\">打开开关</button><button "
+    "type=\"button\"class=\"button0\"style=\"background-color: "
+    "#f44336;\"onclick=\"btn_click(4)\">关闭开关</button></body></html>";
+
+const char *method_open =
+    "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
+    "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
+    "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
+    "\"LxTLInQuyqzSHqgPbldQTA==\"}";
+const char *method_close =
+    "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
+    "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
+    "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
+    "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
+
+class HttpUtils {
+  HTTPClient httpClient;
+  WiFiClient wifiClient;
+
+public:
+  String sendCommand(bool open, int &errCode) {
+    String res;
+    int httpCode;
+
+    if (httpClient.begin(wifiClient, "192.168.31.238", 8081, "/zeroconf/switch")) {
+      if (open) {
+        httpCode = httpClient.POST(method_open);
+      } else {
+        httpCode = httpClient.POST(method_close);
+      }
+
+      errCode = httpCode;
+      res = httpClient.getString();
+      if (httpCode > 0) {
+        if (httpCode == HTTP_CODE_OK ||
+            httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          errCode = 0;
+        }
+      }
+      httpClient.end();
+    }
+    return res;
+  }
+};
+
+HttpUtils httpx;
 
 void NTPClock::handle() {
   static bool start = false;
@@ -286,7 +330,7 @@ void NTPClock::handle() {
 
   matrix_server.on("/control", HTTP_POST, [&]() {
     matrix_server.sendHeader("Connection", "close");
-    matrix_server.send(200, "text/plain", "ok");
+
     bool pushed[3]{false, false, false};
     int timeout[3]{0, 0, 0};
     for (int i = 0; i < matrix_server.args(); i++) {
@@ -296,6 +340,19 @@ void NTPClock::handle() {
           pushed[id] = true;
           timeout[id] = millis();
           event(pushed, timeout);
+          matrix_server.send(200, "text/plain", "ok");
+        }
+        if (id == 3) {
+          int errCode = 0;
+          auto res = httpx.sendCommand(true, errCode);
+          res.trim();
+          matrix_server.send(200, "text/plain", String(errCode) + res);
+        }
+        if (id == 4) {
+          int errCode = 0;
+          auto res = httpx.sendCommand(false, errCode);
+          res.trim();
+          matrix_server.send(200, "text/plain", String(errCode) + res);
         }
       }
     }
