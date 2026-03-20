@@ -253,10 +253,10 @@ void NTPClock::event(const bool *pushed, const int *timeout) {
 }
 
 const char *controller_page1 =
-    R"(<!DOCTYPE html><html lang="zxx"><head><title>Awtrix Controller</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}.btn,button,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:"";background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=password],.lgform .login-form form input[type=text]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=password]:focus,.lgform .login-form form input[type=text]:focus{outline:0}.lgform .login-form form button{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}</style></head><body><section class="lgform"><div id="form-section"><div class="wrapper"><div class="login-form"><form id="lgn" style="display:none"><input id="pwd" type="password" name="tk" placeholder="Password" autocomplete="new-password" required> <button id="login">Login</button></form><form id="ctl" style="display:none"><div style="display:flex;align-items:center;justify-content:center"><button id="0">L</button> <button id="1">M</button> <button id="2">R</button></div><button id="update">Update</button> <button id="wakeup">🎈WakeUp🎈</button> <button id="reboot">Reboot</button> <button id="reset">Reset!</button> <button id="logout">Logout</button></form></div></div></div></section><script>let lgn=document.querySelector("#lgn"),ctl=document.querySelector("#ctl"),pwd=document.querySelector("#pwd"),upd=document.querySelector("#update"),lgn_status=)";
+    R"(<!DOCTYPE html><html lang="zxx"><head><title>Awtrix Controller</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}.btn,button,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:"";background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=password],.lgform .login-form form input[type=text]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=password]:focus,.lgform .login-form form input[type=text]:focus{outline:0}.lgform .login-form form button:not([disabled],.disabled,:disabled){-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}button:disabled{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#999;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700}.lgform .login-form form button:hover:not([disabled],.disabled,:disabled){background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}</style></head><body><section class="lgform"><div id="form-section"><div class="wrapper"><div class="login-form"><form id="lgn" style="display:none"><input id="pwd" type="password" name="tk" placeholder="Password" autocomplete="new-password" required> <button id="login">Login</button></form><form id="ctl" style="display:none"><div style="display:flex;align-items:center;justify-content:center"><button id="0">L</button> <button id="1">M</button> <button id="2">R</button></div><button id="update">Update</button> <button id="wakeup">🎈WakeUp🎈</button> <button id="reboot">Reboot</button> <button id="reset">Reset!</button> <button id="logout">Logout</button></form></div></div></div></section><script>let lgn=document.querySelector("#lgn"),ctl=document.querySelector("#ctl"),pwd=document.querySelector("#pwd"),upd=document.querySelector("#update"),flashing=!1,lgn_status=)";
 
 const char *controller_page2 =
-    R"(;function hash(e){let a=0;for(let t=0;t<e.length;t++){var l=e.charCodeAt(t);a=(a=a*131&2147483647)+l&2147483647}return a.toString()}lgn_status?ctl.style.display="block":lgn.style.display="block",lgn.onsubmit=async t=>{t.preventDefault();var t=new FormData,e=(t.append("id","login"),hash(pwd.value+"-"+Math.floor(Date.now()/1e3)));localStorage.setItem("tk",e),t.append("tk",e);e=await(await fetch("",{method:"POST",body:t})).text();"OK"===e?(lgn.style.display="none",ctl.style.display="block"):(localStorage.removeItem("tk"),alert(e))},ctl.onsubmit=async t=>{t.preventDefault();let e=new FormData;e.append("id",t.submitter.id),e.append("tk",localStorage.getItem("tk")),"logout"===t.submitter.id?(localStorage.removeItem("tk"),document.cookie="awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;",window.location.reload()):"reset"===t.submitter.id&&!confirm("reset?")||("update"===t.submitter.id?((t=document.createElement("input")).type="file",t.style.display="none",t.addEventListener("change",t=>{t=t.target.files[0];e.append("size",t.size),e.append("update",t),upd.disabled=!0,upd.innerHTML="FLASHING...",fetch("update",{method:"POST",body:e}).then(t=>{t.ok?t.text().then(t=>{t.startsWith("OK")?upd.innerHTML="Done.":upd.innerHTML="Err: "+t}):upd.innerHTML="Err: "+t.status})}),t.click()):(t=await(await fetch("",{method:"POST",body:e})).text()).startsWith("OK")||(localStorage.removeItem("tk"),alert(t)))}</script></body></html>)";
+    R"(;function hash(t){let n=0;for(let e=0;e<t.length;e++){var a=t.charCodeAt(e);n=(n=n*131&2147483647)+a&2147483647}return n.toString()}lgn_status?ctl.style.display="block":lgn.style.display="block",lgn.onsubmit=async e=>{e.preventDefault();var e=new FormData,t=(e.append("id","login"),hash(pwd.value+"-"+Math.floor(Date.now()/1e3)));e.append("tk",t);t=await(await fetch("",{method:"POST",body:e})).text();"OK"===t?(lgn.style.display="none",ctl.style.display="block"):alert(t)},ctl.onsubmit=async e=>{e.preventDefault();let t=new FormData;t.append("id",e.submitter.id);var e=e.submitter.id;"logout"===e?(document.cookie="awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;",window.location.reload()):"reset"===e&&!confirm("reset?")||("update"===e?((e=document.createElement("input")).type="file",e.style.display="none",e.addEventListener("change",e=>{e=e.target.files[0];t.append("name",e.name),t.append("size",e.size),t.append("update",e),upd.disabled=!0,upd.innerHTML="FLASHING...",flashing=!0,document.querySelectorAll("button").forEach(e=>{e.style.display="none"}),upd.style.display="block",fetch("update",{method:"POST",body:t}).then(e=>{e.ok?e.text().then(e=>{e.startsWith("OK")?upd.innerHTML="Done.":upd.innerHTML="Err: "+e}):upd.innerHTML="Err: "+e.status})}),e.click()):(e=await(await fetch("",{method:"POST",body:t})).text()).startsWith("OK")||(localStorage.removeItem("tk"),alert(e)))}</script></body></html>)";
 
 const char *method_open =
     "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
@@ -296,7 +296,7 @@ WakeUpTool wake_up_tool;
 
 class TokenChecker {
   int lasttk = -1;
-  String lastip = "";
+  uint32_t lastip = 0;
 
   void split(std::string s, std::string delimiter,
              const std::function<void(const std::string &)> &fn) {
@@ -325,25 +325,27 @@ public:
   }
 
   void clear() {
-    lasttk = -1;
-    lastip = "";
+    lasttk = 0;
+    lastip = 0;
   }
 
-  bool checkToken() {
-    auto tk = matrix_server.arg("tk").toInt();
-    if (tk <= 0) {
+  bool checkToken(int tk = 0) {
+    if (tk == 0) {
       auto cookie = matrix_server.header("Cookie");
       cookie.trim();
       split(cookie.c_str(), ";", [&tk](const std::string &sub) {
         String cstr = String(sub.c_str());
+        cstr.trim();
         if (cstr.startsWith("awtrix_token=")) {
           cstr.replace("awtrix_token=", "");
           tk = cstr.toInt();
         }
       });
     }
+    if (tk == 0)
+      return false;
 
-    auto ip = matrix_server.client().remoteIP().toString();
+    auto ip = matrix_server.client().remoteIP().v4();
     if (tk == lasttk && ip == lastip)
       return true;
 
@@ -362,7 +364,7 @@ public:
 
 TokenChecker token_checker;
 
-bool checkToken() { token_checker.checkToken(); }
+bool checkToken() { return token_checker.checkToken(); }
 
 extern void flashProgress(unsigned int progress, unsigned int total);
 void NTPClock::setup() {
@@ -393,12 +395,9 @@ void NTPClock::setup() {
   matrix_server.on("/control", HTTP_POST, [&]() {
     matrix_server.sendHeader("Connection", "close");
 
-    if (!token_checker.checkToken()) {
-      matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
-      return;
-    }
-
-    if (matrix_server.arg("id") == "login") {
+    auto arg_id = matrix_server.arg("id");
+    if (arg_id == "login" &&
+        token_checker.checkToken(matrix_server.arg("tk").toInt())) {
       String cookie("awtrix_token=");
       cookie += String(token_checker.gettoken());
       matrix_server.sendHeader("Set-Cookie", cookie);
@@ -406,7 +405,12 @@ void NTPClock::setup() {
       return;
     }
 
-    if (matrix_server.arg("id") == "wakeup") {
+    if (!token_checker.checkToken()) {
+      matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+      return;
+    }
+
+    if (arg_id == "wakeup") {
       int errCode;
       auto res = wake_up_tool.sendCommand(true, errCode);
       delay(500);
@@ -415,26 +419,26 @@ void NTPClock::setup() {
       return;
     }
 
-    if (matrix_server.arg("id") == "reboot") {
+    if (arg_id == "reboot") {
       matrix_server.send(200, "text/html", "OK");
       delay(500);
       ESP.restart();
     }
 
-    if (matrix_server.arg("id") == "reset") {
+    if (arg_id == "reset") {
       matrix_wifi_manager.resetSettings();
       ESP.reset();
       matrix_server.send(200, "text/html", "OK");
     }
 
-    if (matrix_server.arg("id") == "logout") {
+    if (arg_id == "logout") {
       token_checker.clear();
       matrix_server.sendHeader("Set-Cookie", "");
       matrix_server.send(200, "text/html", "OK");
       return;
     }
 
-    int id = matrix_server.arg("id").toInt();
+    int id = arg_id.toInt();
     if (id < 3 && id >= 0) {
       bool pushed[3]{false, false, false};
       int timeout[3]{0, 0, 0};
