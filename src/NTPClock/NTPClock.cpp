@@ -253,27 +253,7 @@ void NTPClock::event(const bool *pushed, const int *timeout) {
 }
 
 const char *controller_page =
-    "<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>Awtrix "
-    "Controller</title><style "
-    "type=\"text/"
-    "css\">.button0{background-color:#4CAF50;border-radius:20%;color:white;"
-    "padding:5%5%;text-align:center;text-decoration:none;display:inline-block;"
-    "font-size:40px}</style></head><body><script>function btn_click(id){var "
-    "t=document.createElement(\"form\");t.action=\"control\";t.method=\"post\";"
-    "t.style.display=\"none\";t.target=\"iframe\";var "
-    "opt=document.createElement(\"textarea\");opt.name=\"id\";opt.value=id;t."
-    "appendChild(opt);document.body.appendChild(t);t.submit()}</script><iframe "
-    "id=\"iframe\"name=\"iframe\"style=\"display:none;\"></iframe><button "
-    "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#f44336;\"onclick=\"btn_click(0)\">左按键</button><button "
-    "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#008CBA;\"onclick=\"btn_click(1)\">中按键</button><button "
-    "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#f44336;\"onclick=\"btn_click(2)\">右按键</button><button "
-    "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#f44336;\"onclick=\"btn_click(3)\">打开开关</button><button "
-    "type=\"button\"class=\"button0\"style=\"background-color: "
-    "#f44336;\"onclick=\"btn_click(4)\">关闭开关</button></body></html>";
+    R"(<!DOCTYPE html> <html lang=zxx> <head> <title>Awtrix Controller</title>  <meta charset=UTF-8> <meta name=viewport content="width=device-width,initial-scale=1"> <meta http-equiv=X-UA-Compatible content="ie=edge"> <style>html{scroll-behavior:smooth}body,html{margin:0;padding:0;color:#585858}*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}button,input,select{-webkit-appearance:none;outline:0}button,.btn,select{cursor:pointer}a{text-decoration:none}h1,h2,h3,h4,h5,h6,p,ul,ol{margin:0;padding:0}.lgform #form-section{background-size:cover;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;-ms-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:"";background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff;max-width:600px;margin:0 auto;box-shadow:0 9px 24px 5px rgba(0,0,0,.04)}.lgform .login-form form input[type=text],.lgform .login-form form input[type=password]{-webkit-appearance:none;font-style:normal;font-weight:400;font-size:16px;color:#777;border:none;width:100%;background-color:rgba(88,83,152,.03);padding:24px}.lgform .login-form form input[type=text]{border-right:1px solid #e8e8e8}.lgform .login-form form input[type=text]:focus,.lgform .login-form form input[type=password]:focus{outline:0;background-color:#fff;box-shadow:none}.lgform .login-form form button{-webkit-appearance:none;font-size:14px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.3s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}</style><body> <section class=lgform> <div id=form-section> <div class=wrapper> <div class=login-form> <form id=lgn> <input id=pwd type=password name=tk placeholder=Password autocomplete=new-password required/> <button id=login>Login</button> </form> <form id=ctl style=display:none> <div style=display:flex;align-items:center;justify-content:center> <button id=0>L</button> <button id=1>M</button> <button id=2>R</button> </div> <button id=update>Update</button> <button id=wakeup>WakeUp</button> </form> </div> </div> </div> </section> <script>function hash(str){let hash=0;for(let i=0;i < str.length;i++){const char=str.charCodeAt(i);hash=hash * 131;hash &=0x7fffffff;hash +=char;hash &=0x7fffffff;}return hash.toString();};const lgn=document.querySelector("#lgn");const ctl=document.querySelector("#ctl");const pwd=document.querySelector("#pwd");const upd=document.querySelector("#update");lgn.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append("id","login");const tk=hash(pwd.value + "-" + Math.floor(Date.now()/ 1000));localStorage.setItem("tk",tk);nf.append("tk",tk);const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(txt==="OK"){lgn.style.display="none";ctl.style.display="block";}else{localStorage.removeItem("tk");alert(txt);}};ctl.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append("id",e.submitter.id);nf.append("tk",localStorage.getItem("tk"));if(e.submitter.id==="update"){const ele=document.createElement("input");ele.type="file";ele.style.display="none";ele.addEventListener("change",e=>{const file=e.target.files[0];nf.append('update',file);upd.disabled=true;upd.innerHTML="FLASHING...";fetch('update',{method:'POST',body:nf}).then(r=>{if(r.ok){r.text().then(txt=>{if(!txt.startsWith("OK")){upd.innerHTML="Err:" + txt;}else{upd.innerHTML="Done.";upd.disabled=false;}});}else{upd.innerHTML="Err:" + r.status;}});});ele.click();}else{const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(!txt.startsWith("OK")){localStorage.removeItem("tk");alert(txt);}}};window.onload=()=>{if(!localStorage.getItem("tk")){return;}let nf=new FormData();nf.append("id","login");nf.append("tk",localStorage.getItem("tk"));fetch('',{method:'POST',body:nf}).then((r)=>{console.log(r);if(r.ok){r.text().then((txt)=>{if(txt==="OK"){lgn.style.display="none";ctl.style.display="block";}else{localStorage.removeItem("tk");}});}});}</script>)";
 
 const char *method_open =
     "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
@@ -286,8 +266,6 @@ const char *method_close =
     "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
     "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
 
-int wakeup_status = 0;
-
 class WakeUpTool {
   HTTPClient httpClient;
   WiFiClient wifiClient;
@@ -295,21 +273,13 @@ class WakeUpTool {
 public:
   String sendCommand(bool open, int &errCode) {
     String res;
-    int httpCode;
 
     if (httpClient.begin(wifiClient, "192.168.31.238", 8081,
                          "/zeroconf/switch")) {
-      if (open) {
-        httpCode = httpClient.POST(method_open);
-      } else {
-        httpCode = httpClient.POST(method_close);
-      }
-
-      errCode = httpCode;
+      errCode = httpClient.POST(open ? method_open : method_close);
       res = httpClient.getString();
-      if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK ||
-            httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+      if (errCode > 0) {
+        if (errCode == HTTP_CODE_OK || errCode == HTTP_CODE_MOVED_PERMANENTLY) {
           errCode = 0;
         }
       }
@@ -321,24 +291,48 @@ public:
 
 WakeUpTool wake_up_tool;
 
-void NTPClock::handle() {
-  int errCode = 0;
-  switch (wakeup_status) {
-  case 0:
-    break;
-  case 1: {
-    wake_up_tool.sendCommand(true, errCode);
-    wakeup_status = errCode == 0 ? 2 : 1;
-  } break;
-  case 20: {
-    wake_up_tool.sendCommand(false, errCode);
-    wakeup_status = errCode == 0 ? 0 : 20;
-  } break;
-  default:
-    wakeup_status++;
-    break;
+class TokenChecker {
+  int lasttk = -1;
+  String lastip = "";
+  const char *pwd = "qq279375561-";
+
+public:
+  static long hash(const String &msg) {
+    long h = 0;
+    for (int i = 0; i < msg.length(); i++) {
+      h = h * 131 + msg.charAt(i);
+      h &= 0x7fffffff;
+    }
+    return h;
   }
 
+  bool checkToken() {
+    auto tk = matrix_server.arg("tk").toInt();
+    if (tk == 0)
+      return false;
+
+    auto ip = matrix_server.client().remoteIP().toString();
+    if (tk == lasttk && ip == lastip)
+      return true;
+
+    auto ts = ntp.getEpochTime() - 8 * 60 * 60;
+    for (int i = -5; i < 6; i++) {
+      auto s = String(pwd) + String(ts + i);
+
+      if (hash(s) == tk) {
+        lasttk = tk;
+        lastip = ip;
+        return true;
+      }
+    }
+    return false;
+  }
+};
+
+TokenChecker token_checker;
+
+extern void flashProgress(unsigned int progress, unsigned int total);
+void NTPClock::setup() {
   static bool start = false;
   if (start)
     return;
@@ -351,35 +345,111 @@ void NTPClock::handle() {
   matrix_server.on("/control", HTTP_POST, [&]() {
     matrix_server.sendHeader("Connection", "close");
 
-    bool pushed[3]{false, false, false};
-    int timeout[3]{0, 0, 0};
-    for (int i = 0; i < matrix_server.args(); i++) {
-      if (matrix_server.argName(i) == "id") {
-        int id = matrix_server.arg(i).toInt();
-        if (id < 3 && id >= 0) {
-          pushed[id] = true;
-          timeout[id] = millis();
-          event(pushed, timeout);
-          matrix_server.send(200, "text/plain", "ok");
-        }
-        if (id == 3) {
-          if (wakeup_status == 0)
-            wakeup_status = 1;
-          matrix_server.send(200, "text/plain", String(wakeup_status));
-        }
-        if (id == 4) {
-          matrix_server.send(200, "text/plain", String(wakeup_status));
-        }
-      }
+    if (!token_checker.checkToken()) {
+      matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+      return;
     }
+
+    if (matrix_server.arg("id") == "login") {
+      matrix_server.send(200, "text/plain", "OK");
+      return;
+    }
+
+    if (matrix_server.arg("id") == "wakeup") {
+      int errCode;
+      auto res = wake_up_tool.sendCommand(true, errCode);
+      delay(500);
+      auto res2 = wake_up_tool.sendCommand(false, errCode);
+      matrix_server.send(200, "text/plain", "OK," + res + "," + res2);
+      return;
+    }
+
+    int id = matrix_server.arg("id").toInt();
+    if (id < 3 && id >= 0) {
+      bool pushed[3]{false, false, false};
+      int timeout[3]{0, 0, 0};
+      pushed[id] = true;
+      timeout[id] = millis();
+      event(pushed, timeout);
+      matrix_server.send(200, "text/plain", "OK");
+      return;
+    }
+
+    matrix_server.send(200, "text/plain", "ERROR: BADREQ");
   });
+
+  matrix_server.on(
+      "/update", HTTP_POST,
+      []() {
+        if (!token_checker.checkToken()) {
+          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+          return;
+        }
+
+        matrix_server.sendHeader("Connection", "close");
+        matrix_server.send(200, "text/plain",
+                           (Update.hasError()) ? "FAIL" : "OK");
+        ESP.restart();
+      },
+      []() {
+        if (!token_checker.checkToken()) {
+          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+          return;
+        }
+
+        HTTPUpload &upload = matrix_server.upload();
+
+        if (upload.status == UPLOAD_FILE_START) {
+          Serial.setDebugOutput(true);
+
+          uint32_t maxSketchSpace =
+              (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+          if (!Update.begin(maxSketchSpace)) { // start with max available size
+            Update.printError(Serial);
+          }
+        } else if (upload.status == UPLOAD_FILE_WRITE) {
+          matrix->clear();
+          flashProgress((int)upload.currentSize, (int)upload.buf);
+          if (Update.write(upload.buf, upload.currentSize) !=
+              upload.currentSize) {
+            Update.printError(Serial);
+          }
+        } else if (upload.status == UPLOAD_FILE_END) {
+          if (Update.end(true)) { // true to set the size to the current
+                                  // progress
+            matrix_server.send(200, "text/plain",
+                               (Update.hasError()) ? "FAIL" : "OK");
+          } else {
+            Update.printError(Serial);
+          }
+          Serial.setDebugOutput(false);
+        }
+        yield();
+      });
+
+  // matrix_server.on("/", HTTP_GET, []() {
+  //   matrix_server.sendHeader("Connection", "close");
+  //   matrix_server.send(200, "text/html", "OK");
+  // });
+
+  matrix_server.on("/reset", HTTP_GET, []() {
+    if (!token_checker.checkToken()) {
+      matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+      return;
+    }
+    matrix_wifi_manager.resetSettings();
+    ESP.reset();
+    matrix_server.send(200, "text/html", "OK");
+  });
+
+  matrix_server.begin();
 
   start = true;
 }
 
 void NTPClock::loop(bool *pushed, int *timeout) {
   event(pushed, timeout);
-  handle();
+  setup();
   matrix->clear();
   m->render();
   m->loop();
