@@ -9,23 +9,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-
         body,
         html {
             margin: 0;
-            padding: 0;
-            color: #585858;
         }
 
         * {
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            font-family: -apple-system, Menlo, Monaco, Consolas, serif;
         }
 
-        /*  wrapper */
         .wrapper {
             width: 100%;
             padding-right: 15px;
@@ -59,41 +52,14 @@
         }
 
         button,
-        input,
-        select {
-            -webkit-appearance: none;
-            outline: none;
-        }
-
-        button,
         .btn,
         select {
             cursor: pointer;
         }
 
-        a {
-            text-decoration: none;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        p,
-        ul,
-        ol {
-            margin: 0;
-            padding: 0;
-        }
-
         .lgform #form-section {
             background-size: cover;
             -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            -ms-background-size: cover;
             position: relative;
             display: grid;
             align-items: center;
@@ -127,33 +93,22 @@
 
         .lgform .login-form {
             background: #fff;
-            max-width: 600px;
-            margin: 0px auto;
-            box-shadow: 0px 9px 24px 5px rgba(0, 0, 0, 0.04);
         }
 
         .lgform .login-form form input[type="text"],
         .lgform .login-form form input[type="password"] {
             -webkit-appearance: none;
-            font-style: normal;
-            font-weight: normal;
-            font-size: 16px;
+            font-size: 20px;
             color: #777777;
             border: none;
             width: 100%;
-            background-color: rgba(88, 83, 152, 0.03);
-            padding: 24px;
-        }
-
-        .lgform .login-form form input[type="text"] {
-            border-right: 1px solid #e8e8e8;
+            background-color: #fff;
+            padding: 15px;
         }
 
         .lgform .login-form form input[type="text"]:focus,
         .lgform .login-form form input[type="password"]:focus {
             outline: none;
-            background-color: #fff;
-            box-shadow: none;
         }
 
         .lgform .login-form form button {
@@ -175,14 +130,17 @@
 
         .lgform .login-form form button:hover {
             background: #2abda4;
-            transition: 0.3s ease-in-out;
+            transition: 0.2s ease-in-out;
             opacity: 1;
         }
 
         .lgform .login-form form button:focus {
             outline: none;
         }
+
+
     </style>
+
 </head>
 
 <body>
@@ -191,7 +149,7 @@
     <div id="form-section">
         <div class="wrapper">
             <div class="login-form">
-                <form id="lgn">
+                <form id="lgn" style="display: none">
                     <input id="pwd" type="password" name="tk" placeholder="Password"
                            autocomplete="new-password" required="required"/>
                     <button id="login">Login</button>
@@ -213,6 +171,19 @@
     </div>
 </section>
 <script>
+    const lgn = document.querySelector("#lgn");
+    const ctl = document.querySelector("#ctl");
+    const pwd = document.querySelector("#pwd");
+    const upd = document.querySelector("#update");
+
+    const lgn_status = 0;
+
+    if (lgn_status){
+        ctl.style.display = "block";
+    } else {
+        lgn.style.display = "block";
+    }
+
     function hash(str) {
         let hash = 0;
         for (let i = 0; i < str.length; i++) {
@@ -224,11 +195,6 @@
         }
         return hash.toString();
     };
-
-    const lgn = document.querySelector("#lgn");
-    const ctl = document.querySelector("#ctl");
-    const pwd = document.querySelector("#pwd");
-    const upd = document.querySelector("#update");
 
     lgn.onsubmit = async (e) => {
         e.preventDefault();
@@ -259,6 +225,7 @@
 
         if (e.submitter.id === "logout") {
             localStorage.removeItem("tk");
+            document.cookie = "awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             window.location.reload();
             return;
         }
@@ -309,31 +276,6 @@
             }
         }
     };
-
-    window.onload = () => {
-        if (!localStorage.getItem("tk")) {
-            return;
-        }
-        let nf = new FormData();
-        nf.append("id", "login");
-        nf.append("tk", localStorage.getItem("tk"));
-        fetch('', {
-            method: 'POST',
-            body: nf
-        }).then((r) => {
-            console.log(r);
-            if (r.ok) {
-                r.text().then((txt) => {
-                    if (txt === "OK") {
-                        lgn.style.display = "none";
-                        ctl.style.display = "block";
-                    } else {
-                        localStorage.removeItem("tk");
-                    }
-                });
-            }
-        });
-    }
 
 </script>
 </body>
