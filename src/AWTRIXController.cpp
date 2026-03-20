@@ -78,9 +78,6 @@ MenueControl myMenue;
 
 // update
 ESP8266WebServer matrix_server(80);
-const char *serverIndex =
-    "<form method='POST' action='/update' enctype='multipart/form-data'><input "
-    "type='file' name='update'><input type='submit' value='Update'></form>";
 
 // resetdetector
 #define DRD_TIMEOUT 5.0
@@ -1074,6 +1071,12 @@ void flashProgress(unsigned int progress, unsigned int total) {
   matrix->setCursor(1, 6);
   matrix->setTextColor(matrix->Color(200, 200, 200));
   matrix->print("FLASHING");
+  //
+  // // // zjt
+  // int16_t len = map(progress, 0, total, 0, 31);
+  // matrix->drawLine(0, 7, 32, 7, Color565(200, 200, 200));
+  // matrix->drawLine(0, 7, len, 7, Color565(0, 255, 64));
+  // // //
   matrix->show();
 }
 
@@ -1100,6 +1103,9 @@ void configModeCallback(WiFiManager *myWiFiManager) {
 
 void setup() {
   delay(2000);
+
+  // https://bbs.hassbian.com/thread-7507-1-1.html
+  WiFi.setPhyMode(WIFI_PHY_MODE_11B);
 
   for (int i = 0; i < tasterCount; i++) {
     pinMode(tasterPin[i], INPUT_PULLUP);
@@ -1358,16 +1364,6 @@ void setup() {
   // is needed for only one hotpsot!
   WiFi.mode(WIFI_STA);
 
-  matrix_server.on("/", HTTP_GET, []() {
-    matrix_server.sendHeader("Connection", "close");
-    matrix_server.send(200, "text/html", serverIndex);
-  });
-
-  matrix_server.on("/reset", HTTP_GET, []() {
-    matrix_wifi_manager.resetSettings();
-    ESP.reset();
-    matrix_server.send(200, "text/html", serverIndex);
-  });
   matrix_server.on(
       "/update", HTTP_POST,
       []() {
@@ -1377,6 +1373,22 @@ void setup() {
         ESP.restart();
       },
       []() {
+        extern bool checkToken();
+        if (!checkToken()) {
+          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+          matrix_server.sendHeader("Connection", "close");
+          yield();
+          return;
+        }
+
+        auto totalSize = matrix_server.arg("size").toInt();
+        if (totalSize == 0) {
+          matrix_server.send(200, "text/plain", "ERROR: BADREQ");
+          matrix_server.sendHeader("Connection", "close");
+          yield();
+          return;
+        }
+
         HTTPUpload &upload = matrix_server.upload();
 
         if (upload.status == UPLOAD_FILE_START) {
@@ -1389,7 +1401,9 @@ void setup() {
           }
         } else if (upload.status == UPLOAD_FILE_WRITE) {
           matrix->clear();
-          flashProgress((int)upload.currentSize, (int)upload.buf);
+          static int progress = 0;
+          progress += (int)upload.currentSize;
+          flashProgress(progress > totalSize ? totalSize : progress, totalSize);
           if (Update.write(upload.buf, upload.currentSize) !=
               upload.currentSize) {
             Update.printError(Serial);
@@ -1406,6 +1420,8 @@ void setup() {
         }
         yield();
       });
+
+  ntpclock.setup();
 
   matrix_server.begin();
 

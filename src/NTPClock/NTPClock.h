@@ -116,7 +116,7 @@ public:
 
   static bool should_wait_reconnect(const char *server);
 
-  void handle();
+  void setup();
 
   void event(const bool *pushed, const int *timeout);
 

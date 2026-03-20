@@ -1,42 +1,341 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="zxx">
 <head>
-    <meta charset="utf-8" />
     <title>Awtrix Controller</title>
-    <style type="text/css">
-        .button0 {
-            background-color: #4CAF50;
-            border-radius: 20%;
-            color: white;
-            padding: 5% 5%;
-            text-align: center;
+
+    <!-- Meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            color: #585858;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+        }
+
+        /*  wrapper */
+        .wrapper {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        @media (min-width: 576px) {
+            .wrapper {
+                max-width: 540px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .wrapper {
+                max-width: 720px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .wrapper {
+                max-width: 960px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .wrapper {
+                max-width: 1140px;
+            }
+        }
+
+        button,
+        input,
+        select {
+            -webkit-appearance: none;
+            outline: none;
+        }
+
+        button,
+        .btn,
+        select {
+            cursor: pointer;
+        }
+
+        a {
             text-decoration: none;
-            display: inline-block;
-            font-size: 40px;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        ul,
+        ol {
+            margin: 0;
+            padding: 0;
+        }
+
+        .lgform #form-section {
+            background-size: cover;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            -ms-background-size: cover;
+            position: relative;
+            display: grid;
+            align-items: center;
+            min-height: 100vh;
+            z-index: 0;
+            padding: 15px 0;
+        }
+
+        .lgform #form-section:before {
+            content: "";
+            background: rgba(0, 0, 0, 0.65);
+            position: absolute;
+            top: 0;
+            min-height: 100%;
+            left: 0;
+            right: 0;
+            z-index: -1;
+        }
+
+        .lgform .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lgform .logo a {
+            font-size: 36px;
+            color: #fff;
+            line-height: 40px;
+            font-weight: normal;
+        }
+
+        .lgform .login-form {
+            background: #fff;
+            max-width: 600px;
+            margin: 0px auto;
+            box-shadow: 0px 9px 24px 5px rgba(0, 0, 0, 0.04);
+        }
+
+        .lgform .login-form form input[type="text"],
+        .lgform .login-form form input[type="password"] {
+            -webkit-appearance: none;
+            font-style: normal;
+            font-weight: normal;
+            font-size: 16px;
+            color: #777777;
+            border: none;
+            width: 100%;
+            background-color: rgba(88, 83, 152, 0.03);
+            padding: 24px;
+        }
+
+        .lgform .login-form form input[type="text"] {
+            border-right: 1px solid #e8e8e8;
+        }
+
+        .lgform .login-form form input[type="text"]:focus,
+        .lgform .login-form form input[type="password"]:focus {
+            outline: none;
+            background-color: #fff;
+            box-shadow: none;
+        }
+
+        .lgform .login-form form button {
+            -webkit-appearance: none;
+            font-size: 20px;
+            line-height: 25px;
+            text-align: center;
+            color: #ffffff;
+            background: #2abda4;
+            height: 55px;
+            border: none;
+            display: block;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: 0.3s ease-in-out;
+        }
+
+        .lgform .login-form form button:hover {
+            background: #2abda4;
+            transition: 0.3s ease-in-out;
+            opacity: 1;
+        }
+
+        .lgform .login-form form button:focus {
+            outline: none;
         }
     </style>
 </head>
 
 <body>
-    <script> function btn_click(id) {
-            var t = document.createElement("form");
-            t.action = "control";
-            t.method = "post";
-            t.style.display = "none";
-            t.target = "iframe";
-            var opt = document.createElement("textarea");
-            opt.name = "id";
-            opt.value = id;
-            t.appendChild(opt);
-            document.body.appendChild(t);
-            t.submit();
-        } </script>
-    <iframe id="iframe" name="iframe" style="display:none;"></iframe>
-    <button type="button" class="button0" style="background-color: #f44336;" onclick="btn_click(0)">左按键</button>
-    <button type="button" class="button0" style="background-color: #008CBA;" onclick="btn_click(1)">中按键</button>
-    <button type="button" class="button0" style="background-color: #f44336;" onclick="btn_click(2)">右按键</button>
-</body>
 
+<section class="lgform">
+    <div id="form-section">
+        <div class="wrapper">
+            <div class="login-form">
+                <form id="lgn">
+                    <input id="pwd" type="password" name="tk" placeholder="Password"
+                           autocomplete="new-password" required="required"/>
+                    <button id="login">Login</button>
+                </form>
+                <form id="ctl" style="display: none">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <button id="0">L</button>
+                        <button id="1">M</button>
+                        <button id="2">R</button>
+                    </div>
+                    <button id="update">Update</button>
+                    <button id="wakeup">🎈WakeUp🎈</button>
+                    <button id="reboot">Reboot</button>
+                    <button id="reset">Reset!</button>
+                    <button id="logout">Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function hash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = hash * 131;
+            hash &= 0x7fffffff;
+            hash += char;
+            hash &= 0x7fffffff;
+        }
+        return hash.toString();
+    };
+
+    const lgn = document.querySelector("#lgn");
+    const ctl = document.querySelector("#ctl");
+    const pwd = document.querySelector("#pwd");
+    const upd = document.querySelector("#update");
+
+    lgn.onsubmit = async (e) => {
+        e.preventDefault();
+        let nf = new FormData();
+        nf.append("id", "login");
+        const tk = hash(pwd.value + "-" + Math.floor(Date.now() / 1000));
+        localStorage.setItem("tk", tk);
+        nf.append("tk", tk);
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const txt = await resp.text();
+        if (txt === "OK") {
+            lgn.style.display = "none";
+            ctl.style.display = "block";
+        } else {
+            localStorage.removeItem("tk");
+            alert(txt);
+        }
+    };
+
+    ctl.onsubmit = async (e) => {
+        e.preventDefault();
+        let nf = new FormData();
+        nf.append("id", e.submitter.id);
+        nf.append("tk", localStorage.getItem("tk"));
+
+        if (e.submitter.id === "logout") {
+            localStorage.removeItem("tk");
+            window.location.reload();
+            return;
+        }
+
+        if (e.submitter.id === "reset") {
+            if (!confirm("reset?")) {
+                return;
+            }
+        }
+
+        if (e.submitter.id === "update") {
+            const ele = document.createElement("input");
+            ele.type = "file";
+            ele.style.display = "none";
+            ele.addEventListener("change", e => {
+                const file = e.target.files[0];
+                nf.append('size', file.size);
+                nf.append('update', file);
+                upd.disabled = true;
+                upd.innerHTML = "FLASHING...";
+                fetch('update', {
+                    method: 'POST',
+                    body: nf
+                }).then(r => {
+                    if (r.ok) {
+                        r.text().then(txt => {
+                            if (!txt.startsWith("OK")) {
+                                upd.innerHTML = "Err: " + txt;
+                            } else {
+                                upd.innerHTML = "Done.";
+                            }
+                        });
+                    } else {
+                        upd.innerHTML = "Err: " + r.status;
+                    }
+                });
+            });
+            ele.click();
+        } else {
+            const resp = await fetch('', {
+                method: 'POST',
+                body: nf
+            });
+            const txt = await resp.text();
+            if (!txt.startsWith("OK")) {
+                localStorage.removeItem("tk");
+                alert(txt);
+            }
+        }
+    };
+
+    window.onload = () => {
+        if (!localStorage.getItem("tk")) {
+            return;
+        }
+        let nf = new FormData();
+        nf.append("id", "login");
+        nf.append("tk", localStorage.getItem("tk"));
+        fetch('', {
+            method: 'POST',
+            body: nf
+        }).then((r) => {
+            console.log(r);
+            if (r.ok) {
+                r.text().then((txt) => {
+                    if (txt === "OK") {
+                        lgn.style.display = "none";
+                        ctl.style.display = "block";
+                    } else {
+                        localStorage.removeItem("tk");
+                    }
+                });
+            }
+        });
+    }
+
+</script>
+</body>
 
 </html>
