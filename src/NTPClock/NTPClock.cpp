@@ -379,8 +379,23 @@ void NTPClock::setup() {
     char timestr[80];
     sprintf(timestr, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year,
             1 + p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+
+    String r = "<html>";
+    char buf[80];
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 32; j++) {
+        auto p = matrix_leds[matrix->XY(j, i)];
+        LOG(Serial.printf("trans %d,%d to %d\n", i, j, matrix->XY(i, j)));
+        sprintf(buf, "<span style='color:#%02x%02x%02x'>■</span>", p.r, p.g,
+                p.b);
+        r += buf;
+      }
+      r += "<br>";
+    }
+    r += "</html>";
+
     matrix_server.sendHeader("Connection", "close");
-    matrix_server.send(200, "text/plain", timestr);
+    matrix_server.send(200, "text/html", r);
   });
 
   matrix_server.on("/control", HTTP_GET, []() {
