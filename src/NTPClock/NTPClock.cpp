@@ -253,24 +253,25 @@ void NTPClock::event(const bool *pushed, const int *timeout) {
 }
 
 const char *controller_page1 =
-    R"(<!DOCTYPE html><html lang=zxx><head><title>Awtrix Controller</title><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}button,.btn,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:"";background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=text],.lgform .login-form form input[type=password]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=text]:focus,.lgform .login-form form input[type=password]:focus{outline:0}.lgform .login-form form button{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}</style><body><section class=lgform><div id=form-section><div class=wrapper><div class=login-form><form id=lgn style=display:none><input id=pwd type=password name=tk placeholder=Password autocomplete=new-password required> <button id=login>Login</button></form><form id=ctl style=display:none><div style=display:flex;align-items:center;justify-content:center><button id=0>L</button> <button id=1>M</button> <button id=2>R</button></div><button id=update>Update</button> <button id=wakeup>🎈WakeUp🎈</button> <button id=reboot>Reboot</button> <button id=reset>Reset!</button> <button id=logout>Logout</button></form></div></div></div></section><script>const lgn=document.querySelector("#lgn");const ctl=document.querySelector("#ctl");const pwd=document.querySelector("#pwd");const upd=document.querySelector("#update");const lgn_status=)";
-const char *controller_page2 =
-    R"(;if(lgn_status){ctl.style.display="block";}else{lgn.style.display="block";}function hash(str){let hash=0;for(let i=0;i < str.length;i++){const char=str.charCodeAt(i);hash=hash * 131;hash &=0x7fffffff;hash +=char;hash &=0x7fffffff;}return hash.toString();};lgn.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append("id","login");const tk=hash(pwd.value + "-" + Math.floor(Date.now()/ 1000));localStorage.setItem("tk",tk);nf.append("tk",tk);const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(txt==="OK"){lgn.style.display="none";ctl.style.display="block";}else{localStorage.removeItem("tk");alert(txt);}};ctl.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append("id",e.submitter.id);nf.append("tk",localStorage.getItem("tk"));if(e.submitter.id==="logout"){localStorage.removeItem("tk");document.cookie="awtrix_token=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/;";window.location.reload();return;}if(e.submitter.id==="reset"){if(!confirm("reset?")){return;}}if(e.submitter.id==="update"){const ele=document.createElement("input");ele.type="file";ele.style.display="none";ele.addEventListener("change",e=>{const file=e.target.files[0];nf.append('size',file.size);nf.append('update',file);upd.disabled=true;upd.innerHTML="FLASHING...";fetch('update',{method:'POST',body:nf}).then(r=>{if(r.ok){r.text().then(txt=>{if(!txt.startsWith("OK")){upd.innerHTML="Err:" + txt;}else{upd.innerHTML="Done.";}});}else{upd.innerHTML="Err:" + r.status;}});});ele.click();}else{const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(!txt.startsWith("OK")){localStorage.removeItem("tk");alert(txt);}}};</script>)";
+    R"(<!DOCTYPE html><html lang=zxx><head><title>Awtrix Controller</title><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}button,.btn,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:'';background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=text],.lgform .login-form form input[type=password]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=text]:focus,.lgform .login-form form input[type=password]:focus{outline:0}.lgform .login-form form button{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}#screen{background-color:#000;line-height:.6;text-align:center;letter-spacing:2px;font-size:2.5vw}</style><body><section class=lgform><div id=form-section><div class=wrapper><div class=login-form><form id=lgn style=display:none><input id=pwd type=password name=tk placeholder=Password autocomplete=new-password required> <button id=login>Login</button></form><form id=ctl style=display:none><div style=display:flex;align-items:center;justify-content:center><button id=0>L</button> <button id=1>M</button> <button id=2>R</button></div><div id=screen></div><button id=update>Update</button> <button id=wakeup>🎈WakeUp🎈</button> <button id=reboot>Reboot</button> <button id=reset>Reset!</button> <button id=logout>Logout</button></form></div></div></div></section><script>const lgn=document.querySelector('#lgn');const ctl=document.querySelector('#ctl');const pwd=document.querySelector('#pwd');const upd=document.querySelector('#update');const lgn_status=)";
 
-const char *method_open =
-    "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
-    "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
-    "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
-    "\"LxTLInQuyqzSHqgPbldQTA==\"}";
-const char *method_close =
-    "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
-    "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
-    "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
-    "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
+const char *controller_page2 =
+    R"(;const spans=[];const scr=document.getElementById('screen');for(let i=0;i < 8;i++){for(let j=0;j < 32;j++){const span=document.createElement('span');span.innerText='■';scr.appendChild(span);spans.push(span);}scr.append(document.createElement('br'));}const updatescr=async()=>{let nf=new FormData();nf.append('id','screen');const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();const data=txt.split(',');if(data.length===256){for(let i=0;i < 256;i++){const c=parseInt(data[i]);const r=(c & 0xff0000)>> 16;const g=(c & 0xff00)>> 8;const b=c & 0xff;spans[i].style.color='rgb(' + r + ',' + g + ',' + b + ')';}}};scr.addEventListener("click",updatescr);if(lgn_status){updatescr();ctl.style.display='block';}else{lgn.style.display='block';}function hash(str){let hash=0;for(let i=0;i < str.length;i++){const char=str.charCodeAt(i);hash=hash * 131;hash &=0x7fffffff;hash +=char;hash &=0x7fffffff;}return hash.toString();};lgn.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id','login');const tk=hash(pwd.value + '-' + Math.floor(Date.now()/ 1000));localStorage.setItem('tk',tk);nf.append('tk',tk);const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(txt==='OK'){updatescr();lgn.style.display='none';ctl.style.display='block';}else{localStorage.removeItem('tk');alert(txt);}};ctl.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id',e.submitter.id);nf.append('tk',localStorage.getItem('tk'));if(e.submitter.id==='logout'){localStorage.removeItem('tk');document.cookie='awtrix_token=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/;';window.location.reload();return;}if(e.submitter.id==='reset'){if(!confirm('reset?')){return;}}if(e.submitter.id==='update'){const ele=document.createElement('input');ele.type='file';ele.style.display='none';ele.addEventListener('change',e=>{const file=e.target.files[0];nf.append('size',file.size);nf.append('update',file);upd.innerHTML='FLASHING...';scr.style.display='none';document.querySelectorAll('button').forEach(btn=> btn.style.display='none');upd.style.display='block';upd.style.background='gray';upd.disabled=true;fetch('update',{method:'POST',body:nf}).then(r=>{if(r.ok){r.text().then(txt=>{if(!txt.startsWith('OK')){upd.style.background='red';upd.innerHTML='Err:' + txt;}else{upd.style.background='green';upd.innerHTML='Done.';}});}else{upd.innerHTML='Err:' + r.status;}});});ele.click();}else{const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(!txt.startsWith('OK')){localStorage.removeItem('tk');alert(txt);}}};</script>)";
 
 class WakeUpTool {
   HTTPClient httpClient;
   WiFiClient wifiClient;
+
+  const char *method_open =
+      "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
+      "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
+      "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
+      "\"LxTLInQuyqzSHqgPbldQTA==\"}";
+  const char *method_close =
+      "{\"sequence\":\"0000000000000\",\"deviceid\":\"1001202f79\","
+      "\"selfApikey\":\"00000000-0000-0000-0000-000000000000\",\"iv\":"
+      "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
+      "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
 
 public:
   String sendCommand(bool open, int &errCode) {
@@ -324,11 +325,15 @@ public:
   }
 
   void clear() {
-    lasttk = 0;
+    lasttk = -1;
     lastip = 0;
   }
 
   bool checkToken(int tk = 0) {
+    auto ip = matrix_server.client().remoteIP().v4();
+    if ((ip & 0xff) == 192 && ((ip >> 8) & 0xff) == 168)
+      return true;
+
     if (tk == 0) {
       auto cookie = matrix_server.header("Cookie");
       cookie.trim();
@@ -344,7 +349,6 @@ public:
     if (tk == 0)
       return false;
 
-    auto ip = matrix_server.client().remoteIP().v4();
     if (tk == lasttk && ip == lastip)
       return true;
 
@@ -363,8 +367,6 @@ public:
 
 TokenChecker token_checker;
 
-bool checkToken() { return token_checker.checkToken(); }
-
 extern void flashProgress(unsigned int progress, unsigned int total);
 void NTPClock::setup() {
   static bool start = false;
@@ -379,23 +381,8 @@ void NTPClock::setup() {
     char timestr[80];
     sprintf(timestr, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year,
             1 + p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
-
-    String r = "<html>";
-    char buf[80];
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 32; j++) {
-        auto p = matrix_leds[matrix->XY(j, i)];
-        LOG(Serial.printf("trans %d,%d to %d\n", i, j, matrix->XY(i, j)));
-        sprintf(buf, "<span style='color:#%02x%02x%02x'>■</span>", p.r, p.g,
-                p.b);
-        r += buf;
-      }
-      r += "<br>";
-    }
-    r += "</html>";
-
     matrix_server.sendHeader("Connection", "close");
-    matrix_server.send(200, "text/html", r);
+    matrix_server.send(200, "text/html", timestr);
   });
 
   matrix_server.on("/control", HTTP_GET, []() {
@@ -433,6 +420,23 @@ void NTPClock::setup() {
       return;
     }
 
+    if (arg_id == "screen") {
+      String r;
+      for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 32; j++) {
+          auto p = matrix_leds[matrix->XY(j, i)];
+          uint32_t c = p.r << 16;
+          c += p.g << 8;
+          c += p.b;
+          r += String(c);
+          if (i != 7 || j != 31)
+            r += ",";
+        }
+      }
+      matrix_server.send(200, "text/html", r);
+      return;
+    }
+
     if (arg_id == "reboot") {
       matrix_server.send(200, "text/html", "OK");
       delay(500);
@@ -447,7 +451,7 @@ void NTPClock::setup() {
 
     if (arg_id == "logout") {
       token_checker.clear();
-      matrix_server.sendHeader("Set-Cookie", "");
+      matrix_server.sendHeader("Set-Cookie", "awtrix-token=");
       matrix_server.send(200, "text/html", "OK");
       return;
     }
@@ -466,10 +470,65 @@ void NTPClock::setup() {
     matrix_server.send(200, "text/plain", "ERROR: BADREQ");
   });
 
-  const char *headerkeys[] = {"Cookie"};
-  size_t headerkeyssize = sizeof(headerkeys) / sizeof(char *);
-  matrix_server.collectHeaders(
-      headerkeys, headerkeyssize); // ask server to track these headers
+  matrix_server.on(
+      "/update", HTTP_POST,
+      []() {
+        matrix_server.sendHeader("Connection", "close");
+        matrix_server.send(200, "text/plain",
+                           (Update.hasError()) ? "FAIL" : "OK");
+        ESP.restart();
+      },
+      []() {
+        if (!token_checker.checkToken()) {
+          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+          matrix_server.sendHeader("Connection", "close");
+          yield();
+          return;
+        }
+
+        auto totalSize = matrix_server.arg("size").toInt();
+        if (totalSize == 0) {
+          matrix_server.send(200, "text/plain", "ERROR: BADREQ");
+          matrix_server.sendHeader("Connection", "close");
+          yield();
+          return;
+        }
+
+        HTTPUpload &upload = matrix_server.upload();
+
+        if (upload.status == UPLOAD_FILE_START) {
+          Serial.setDebugOutput(true);
+
+          uint32_t maxSketchSpace =
+              (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+          if (!Update.begin(maxSketchSpace)) { // start with max available size
+            Update.printError(Serial);
+          }
+        } else if (upload.status == UPLOAD_FILE_WRITE) {
+          matrix->clear();
+          static int progress = 0;
+          progress += (int)upload.currentSize;
+          flashProgress(progress > totalSize ? totalSize : progress, totalSize);
+          if (Update.write(upload.buf, upload.currentSize) !=
+              upload.currentSize) {
+            Update.printError(Serial);
+          }
+        } else if (upload.status == UPLOAD_FILE_END) {
+          if (Update.end(true)) { // true to set the size to the current
+                                  // progress
+            matrix_server.send(200, "text/plain",
+                               (Update.hasError()) ? "FAIL" : "OK");
+          } else {
+            Update.printError(Serial);
+          }
+          Serial.setDebugOutput(false);
+        }
+        yield();
+      });
+
+  const char *hks[] = {"Cookie"};
+  size_t sz = sizeof(hks) / sizeof(char *);
+  matrix_server.collectHeaders(hks, sz); // ask server to track these headers
   matrix_server.begin();
 
   start = true;

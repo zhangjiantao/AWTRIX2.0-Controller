@@ -1364,63 +1364,6 @@ void setup() {
   // is needed for only one hotpsot!
   WiFi.mode(WIFI_STA);
 
-  matrix_server.on(
-      "/update", HTTP_POST,
-      []() {
-        matrix_server.sendHeader("Connection", "close");
-        matrix_server.send(200, "text/plain",
-                           (Update.hasError()) ? "FAIL" : "OK");
-        ESP.restart();
-      },
-      []() {
-        extern bool checkToken();
-        if (!checkToken()) {
-          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
-          matrix_server.sendHeader("Connection", "close");
-          yield();
-          return;
-        }
-
-        auto totalSize = matrix_server.arg("size").toInt();
-        if (totalSize == 0) {
-          matrix_server.send(200, "text/plain", "ERROR: BADREQ");
-          matrix_server.sendHeader("Connection", "close");
-          yield();
-          return;
-        }
-
-        HTTPUpload &upload = matrix_server.upload();
-
-        if (upload.status == UPLOAD_FILE_START) {
-          Serial.setDebugOutput(true);
-
-          uint32_t maxSketchSpace =
-              (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-          if (!Update.begin(maxSketchSpace)) { // start with max available size
-            Update.printError(Serial);
-          }
-        } else if (upload.status == UPLOAD_FILE_WRITE) {
-          matrix->clear();
-          static int progress = 0;
-          progress += (int)upload.currentSize;
-          flashProgress(progress > totalSize ? totalSize : progress, totalSize);
-          if (Update.write(upload.buf, upload.currentSize) !=
-              upload.currentSize) {
-            Update.printError(Serial);
-          }
-        } else if (upload.status == UPLOAD_FILE_END) {
-          if (Update.end(true)) { // true to set the size to the current
-                                  // progress
-            matrix_server.send(200, "text/plain",
-                               (Update.hasError()) ? "FAIL" : "OK");
-          } else {
-            Update.printError(Serial);
-          }
-          Serial.setDebugOutput(false);
-        }
-        yield();
-      });
-
   ntpclock.setup();
 
   matrix_server.begin();

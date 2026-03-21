@@ -32,7 +32,7 @@ public:
 
     last_update_ms = ms;
     auto ldr = analogRead(LDR_PIN);
-    auto update = map(ldr > 512 ? 512 : ldr, 0, 512, 4, 70);
+    auto update = map(ldr > 512 ? 512 : ldr, 0, 512, 9, 70);
     return UpdateBrightness(update);
   }
 };
@@ -40,7 +40,7 @@ public:
 class Brightness : public Widget {
   uint8_t current = 4; // auto
   uint8_t animation_progress = 0;
-  uint8_t br[4] = {5, 27, 49, 70};
+  uint8_t br[4] = {10, 27, 49, 70};
   uint8_t frame[4][12] = {
       {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00},
       {0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x1c, 0x08, 0x00, 0x00, 0x00, 0x00},

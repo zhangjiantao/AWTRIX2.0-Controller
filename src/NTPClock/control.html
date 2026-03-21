@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang='zxx'>
 <head>
     <title>Awtrix Controller</title>
 
     <!-- Meta tags -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
 
     <style>
         body,
@@ -69,7 +69,7 @@
         }
 
         .lgform #form-section:before {
-            content: "";
+            content: '';
             background: rgba(0, 0, 0, 0.65);
             position: absolute;
             top: 0;
@@ -95,8 +95,8 @@
             background: #fff;
         }
 
-        .lgform .login-form form input[type="text"],
-        .lgform .login-form form input[type="password"] {
+        .lgform .login-form form input[type='text'],
+        .lgform .login-form form input[type='password'] {
             -webkit-appearance: none;
             font-size: 20px;
             color: #777777;
@@ -106,8 +106,8 @@
             padding: 15px;
         }
 
-        .lgform .login-form form input[type="text"]:focus,
-        .lgform .login-form form input[type="password"]:focus {
+        .lgform .login-form form input[type='text']:focus,
+        .lgform .login-form form input[type='password']:focus {
             outline: none;
         }
 
@@ -140,10 +140,10 @@
 
         #screen {
             background-color: black;
-            line-height: .72;
+            line-height: .6;
             text-align: center;
             letter-spacing: 2px;
-            font-size: 3vw;
+            font-size: 2.5vw;
         }
 
 
@@ -153,172 +153,80 @@
 
 <body>
 
-<section class="lgform">
-    <div id="form-section">
-        <div class="wrapper">
-            <div class="login-form">
-                <form id="lgn" style="display: none">
-                    <input id="pwd" type="password" name="tk" placeholder="Password"
-                           autocomplete="new-password" required="required"/>
-                    <button id="login">Login</button>
+<section class='lgform'>
+    <div id='form-section'>
+        <div class='wrapper'>
+            <div class='login-form'>
+                <form id='lgn' style='display: none'>
+                    <input id='pwd' type='password' name='tk' placeholder='Password'
+                           autocomplete='new-password' required='required'/>
+                    <button id='login'>Login</button>
                 </form>
-                <form id="ctl" style="display: none">
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <button id="0">L</button>
-                        <button id="1">M</button>
-                        <button id="2">R</button>
+                <form id='ctl' style='display: none'>
+                    <div style='display: flex; align-items: center; justify-content: center;'>
+                        <button id='0'>L</button>
+                        <button id='1'>M</button>
+                        <button id='2'>R</button>
                     </div>
-                    <div id="screen">
-
-                        <html><span style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#22f728'>■</span><span
-                                style='color:#22f728'>■</span><span style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><br><span style='color:#000000'>■</span><span
-                                style='color:#000000'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#c7cfc7'>■</span><span style='color:#c7cfc7'>■</span><span
-                                style='color:#c7cfc7'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#364136'>■</span><span
-                                style='color:#364136'>■</span><span style='color:#000000'>■</span><span style='color:#000000'>■</span><br>
-                        </html>
-                    </div>
-                    <button id="update">Update</button>
-                    <button id="wakeup">🎈WakeUp🎈</button>
-                    <button id="reboot">Reboot</button>
-                    <button id="reset">Reset!</button>
-                    <button id="logout">Logout</button>
+                    <div id='screen'></div>
+                    <button id='update'>Update</button>
+                    <button id='wakeup'>🎈WakeUp🎈</button>
+                    <button id='reboot'>Reboot</button>
+                    <button id='reset'>Reset!</button>
+                    <button id='logout'>Logout</button>
                 </form>
             </div>
         </div>
     </div>
 </section>
 <script>
-    const lgn = document.querySelector("#lgn");
-    const ctl = document.querySelector("#ctl");
-    const pwd = document.querySelector("#pwd");
-    const upd = document.querySelector("#update");
+    const lgn = document.querySelector('#lgn');
+    const ctl = document.querySelector('#ctl');
+    const pwd = document.querySelector('#pwd');
+    const upd = document.querySelector('#update');
 
     const lgn_status = 1;
 
-    if (lgn_status) {
-        ctl.style.display = "block";
-    } else {
-        lgn.style.display = "block";
+    const spans = [];
+    const scr = document.getElementById('screen');
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 32; j++) {
+            const span = document.createElement('span');
+            span.innerText = '■';
+            scr.appendChild(span);
+            spans.push(span);
+        }
+        scr.append(document.createElement('br'));
     }
+
+    const updatescr = async () => {
+        let nf = new FormData();
+        nf.append('id', 'screen');
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const txt = await resp.text();
+        const data = txt.split(',');
+        if (data.length === 256) {
+            for (let i = 0; i < 256; i++) {
+                const c = parseInt(data[i]);
+                const r = (c & 0xff0000) >> 16;
+                const g = (c & 0xff00) >> 8;
+                const b = c & 0xff;
+                spans[i].style.color = 'rgb(' + r + ',' + g + ',' + b + ')';
+            }
+        }
+    };
+    scr.addEventListener("click", updatescr);
+
+    if (lgn_status) {
+        updatescr();
+        ctl.style.display = 'block';
+    } else {
+        lgn.style.display = 'block';
+    }
+
 
     function hash(str) {
         let hash = 0;
@@ -335,20 +243,21 @@
     lgn.onsubmit = async (e) => {
         e.preventDefault();
         let nf = new FormData();
-        nf.append("id", "login");
-        const tk = hash(pwd.value + "-" + Math.floor(Date.now() / 1000));
-        localStorage.setItem("tk", tk);
-        nf.append("tk", tk);
+        nf.append('id', 'login');
+        const tk = hash(pwd.value + '-' + Math.floor(Date.now() / 1000));
+        localStorage.setItem('tk', tk);
+        nf.append('tk', tk);
         const resp = await fetch('', {
             method: 'POST',
             body: nf
         });
         const txt = await resp.text();
-        if (txt === "OK") {
-            lgn.style.display = "none";
-            ctl.style.display = "block";
+        if (txt === 'OK') {
+            updatescr();
+            lgn.style.display = 'none';
+            ctl.style.display = 'block';
         } else {
-            localStorage.removeItem("tk");
+            localStorage.removeItem('tk');
             alert(txt);
         }
     };
@@ -356,46 +265,52 @@
     ctl.onsubmit = async (e) => {
         e.preventDefault();
         let nf = new FormData();
-        nf.append("id", e.submitter.id);
-        nf.append("tk", localStorage.getItem("tk"));
+        nf.append('id', e.submitter.id);
+        nf.append('tk', localStorage.getItem('tk'));
 
-        if (e.submitter.id === "logout") {
-            localStorage.removeItem("tk");
-            document.cookie = "awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        if (e.submitter.id === 'logout') {
+            localStorage.removeItem('tk');
+            document.cookie = 'awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             window.location.reload();
             return;
         }
 
-        if (e.submitter.id === "reset") {
-            if (!confirm("reset?")) {
+        if (e.submitter.id === 'reset') {
+            if (!confirm('reset?')) {
                 return;
             }
         }
 
-        if (e.submitter.id === "update") {
-            const ele = document.createElement("input");
-            ele.type = "file";
-            ele.style.display = "none";
-            ele.addEventListener("change", e => {
+        if (e.submitter.id === 'update') {
+            const ele = document.createElement('input');
+            ele.type = 'file';
+            ele.style.display = 'none';
+            ele.addEventListener('change', e => {
                 const file = e.target.files[0];
                 nf.append('size', file.size);
                 nf.append('update', file);
+                upd.innerHTML = 'FLASHING...';
+                scr.style.display = 'none';
+                document.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
+                upd.style.display = 'block';
+                upd.style.background = 'gray';
                 upd.disabled = true;
-                upd.innerHTML = "FLASHING...";
                 fetch('update', {
                     method: 'POST',
                     body: nf
                 }).then(r => {
                     if (r.ok) {
                         r.text().then(txt => {
-                            if (!txt.startsWith("OK")) {
-                                upd.innerHTML = "Err: " + txt;
+                            if (!txt.startsWith('OK')) {
+                                upd.style.background = 'red';
+                                upd.innerHTML = 'Err: ' + txt;
                             } else {
-                                upd.innerHTML = "Done.";
+                                upd.style.background = 'green';
+                                upd.innerHTML = 'Done.';
                             }
                         });
                     } else {
-                        upd.innerHTML = "Err: " + r.status;
+                        upd.innerHTML = 'Err: ' + r.status;
                     }
                 });
             });
@@ -406,8 +321,8 @@
                 body: nf
             });
             const txt = await resp.text();
-            if (!txt.startsWith("OK")) {
-                localStorage.removeItem("tk");
+            if (!txt.startsWith('OK')) {
+                localStorage.removeItem('tk');
                 alert(txt);
             }
         }
