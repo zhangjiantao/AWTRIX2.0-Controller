@@ -407,15 +407,16 @@ TokenChecker token_checker;
 extern void flashProgress(unsigned int progress, unsigned int total);
 void NTPClock::setup() {
   matrix_server.on("/", []() {
-    extern unsigned long startup_time;
-    time_t timep = startup_time;
-    struct tm *p;
-    p = localtime(&timep);
-    char timestr[80];
-    sprintf(timestr, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year,
-            1 + p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
-    matrix_server.sendHeader("Connection", "close");
-    matrix_server.send(200, "text/html", timestr);
+    // extern unsigned long startup_time;
+    // time_t timep = startup_time;
+    // struct tm *p;
+    // p = localtime(&timep);
+    // char timestr[80];
+    // sprintf(timestr, "%d/%d/%d %02d:%02d:%02d\n", 1900 + p->tm_year,
+    //         1 + p->tm_mon, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+    // matrix_server.sendHeader("Connection", "close");
+    // matrix_server.send(200, "text/html", timestr);
+    matrix_server.client().stop();
   });
 
   matrix_server.on("/control", HTTP_GET, []() {
@@ -541,8 +542,8 @@ void NTPClock::setup() {
         matrix_server.sendHeader("Connection", "close");
         matrix_server.send(200, "text/plain",
                            (Update.hasError()) ? "FAIL" : "OK");
+        matrix_server.client().flush();
         yield();
-        delay(500);
         ESP.restart();
       },
       []() {

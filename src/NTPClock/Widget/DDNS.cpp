@@ -123,61 +123,63 @@ unsigned long DDNS_TASK::next_update_ts = 0;
 bool DDNS_TASK::duckdns_ok = false;
 bool DDNS_TASK::cloudns_ok = false;
 
-class DDNS : public Widget {
-  uint16_t c_succe = Color565(0, 255, 64);
-  uint16_t c_error = Color565(255, 0, 0);
-  uint16_t update_progress_fc = Color565(230, 230, 230);
-  uint16_t update_progress_bc = Color565(130, 130, 130);
-  uint8_t animation_progress = 0;
-  uint16_t animation_color = c_error;
-  uint8_t update_progress = 0;
-
-  unsigned frame_delay = 0;
-
-public:
-  void loop() override {
-    static unsigned _delay = 0;
-    _delay = ++_delay % (frame_delay + 1);
-    if (_delay == 0) {
-      auto ts = ntp.getEpochTime();
-      update_progress =
-          32 - ((DDNS_TASK::next_update_ts - ts) / DDNS_UPDATE_TIME);
-      if (update_progress == 0) {
-        animation_progress = 0;
-        animation_color = (DDNS_TASK::duckdns_ok && DDNS_TASK::cloudns_ok)
-                              ? c_succe
-                              : c_error;
-      } else {
-        animation_progress++;
-      }
-    }
-  }
-
-  bool event1() override {
-    frame_delay = ++frame_delay % 5;
-    return true;
-  }
-
-  void render(int x, int y) override {
-    auto black = Color565(0, 0, 0);
-    matrix->fillRect(x, y, 32, 8, black);
-    matrix->setTextColor(animation_color);
-    matrix->setCursor(x - animation_progress + 32, y + 6);
-
-    char buff[64];
-    int16_t x1, y1;
-    uint16_t w, h;
-    snprintf(buff, 64, "DUCKDNS %d CLOUDNS %d     ", DDNS_TASK::duckdns_ok,
-             DDNS_TASK::cloudns_ok);
-    matrix->getTextBounds(buff, 0, 0, &x1, &y1, &w, &h);
-    matrix->print(buff);
-
-    if (animation_progress > w)
-      animation_progress = 0;
-    matrix->drawLine(x, y + 7, x + 32, y + 7, update_progress_bc);
-    matrix->drawLine(x, y + 7, x + update_progress, y + 7, update_progress_fc);
-  }
-};
-
-static Registry::RegisterFullscreenWidget<DDNS> X;
+//
+// class DDNS : public Widget {
+//   uint16_t c_succe = Color565(0, 255, 64);
+//   uint16_t c_error = Color565(255, 0, 0);
+//   uint16_t update_progress_fc = Color565(230, 230, 230);
+//   uint16_t update_progress_bc = Color565(130, 130, 130);
+//   uint8_t animation_progress = 0;
+//   uint16_t animation_color = c_error;
+//   uint8_t update_progress = 0;
+//
+//   unsigned frame_delay = 0;
+//
+// public:
+//   void loop() override {
+//     static unsigned _delay = 0;
+//     _delay = ++_delay % (frame_delay + 1);
+//     if (_delay == 0) {
+//       auto ts = ntp.getEpochTime();
+//       update_progress =
+//           32 - ((DDNS_TASK::next_update_ts - ts) / DDNS_UPDATE_TIME);
+//       if (update_progress == 0) {
+//         animation_progress = 0;
+//         animation_color = (DDNS_TASK::duckdns_ok && DDNS_TASK::cloudns_ok)
+//                               ? c_succe
+//                               : c_error;
+//       } else {
+//         animation_progress++;
+//       }
+//     }
+//   }
+//
+//   bool event1() override {
+//     frame_delay = ++frame_delay % 5;
+//     return true;
+//   }
+//
+//   void render(int x, int y) override {
+//     auto black = Color565(0, 0, 0);
+//     matrix->fillRect(x, y, 32, 8, black);
+//     matrix->setTextColor(animation_color);
+//     matrix->setCursor(x - animation_progress + 32, y + 6);
+//
+//     char buff[64];
+//     int16_t x1, y1;
+//     uint16_t w, h;
+//     snprintf(buff, 64, "DUCKDNS %d CLOUDNS %d     ", DDNS_TASK::duckdns_ok,
+//              DDNS_TASK::cloudns_ok);
+//     matrix->getTextBounds(buff, 0, 0, &x1, &y1, &w, &h);
+//     matrix->print(buff);
+//
+//     if (animation_progress > w)
+//       animation_progress = 0;
+//     matrix->drawLine(x, y + 7, x + 32, y + 7, update_progress_bc);
+//     matrix->drawLine(x, y + 7, x + update_progress, y + 7,
+//     update_progress_fc);
+//   }
+// };
+//
+// static Registry::RegisterFullscreenWidget<DDNS> X;
 static Registry::RegisterTask<DDNS_TASK> Y;
