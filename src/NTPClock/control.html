@@ -148,7 +148,6 @@
 
 
     </style>
-
 </head>
 
 <body>
@@ -170,7 +169,7 @@
                     </div>
                     <div id='screen'></div>
                     <button id='update'>Update</button>
-                    <button id='wakeup'>🎈WakeUp🎈</button>
+                    <button id='wakeup'>WakeUp</button>
                     <button id='reboot'>Reboot</button>
                     <button id='reset'>Reset!</button>
                     <button id='logout'>Logout</button>
@@ -184,6 +183,7 @@
     const ctl = document.querySelector('#ctl');
     const pwd = document.querySelector('#pwd');
     const upd = document.querySelector('#update');
+    const wk = document.querySelector('#wakeup');
 
     const lgn_status = 1;
 
@@ -220,8 +220,28 @@
     };
     scr.addEventListener("click", updatescr);
 
+    const wakenuc = async (keep) => {
+        let nf = new FormData();
+        nf.append('id', 'wakeup');
+        if (keep !== undefined) {
+            nf.append('action', keep ? 'keep' : 'auto')
+        }
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const s = (await resp.text()).charAt(2);
+        if (s === 0)
+            wk.innerHTML = 'WakeUp: auto';
+        else if (s === 1)
+            wk.innerHTML = 'WakeUp: keep';
+        else
+            wk.innerHTML = 'WakeUp: sleeping';
+    }
+
     if (lgn_status) {
         updatescr();
+        wakenuc();
         ctl.style.display = 'block';
     } else {
         lgn.style.display = 'block';
@@ -315,16 +335,11 @@
                 });
             });
             ele.click();
-        } else {
-            const resp = await fetch('', {
-                method: 'POST',
-                body: nf
-            });
-            const txt = await resp.text();
-            if (!txt.startsWith('OK')) {
-                localStorage.removeItem('tk');
-                alert(txt);
-            }
+        }
+
+        if (e.submitter.id === 'wakeup') {
+            curr = wk.innerHTML;
+            wakenuc(curr.includes('sleeping') || curr.includes('auto'))
         }
     };
 
