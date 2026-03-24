@@ -425,6 +425,7 @@ const char *controller_page1 =
                     <div id='screen'></div>
                     <button id='update'>Update</button>
                     <button id='wakeup'>WakeUp</button>
+                    <button id='docker'>Docker</button>
                     <button id='reboot'>Reboot</button>
                     <button id='reset'>Reset!</button>
                     <button id='logout'>Logout</button>
@@ -434,16 +435,15 @@ const char *controller_page1 =
     </div>
 </section>
 <script>
+    const lgn_status = )";
+
+const char *controller_page2 =
+    R"(;
     const lgn = document.querySelector('#lgn');
     const ctl = document.querySelector('#ctl');
     const pwd = document.querySelector('#pwd');
     const upd = document.querySelector('#update');
     const wk = document.querySelector('#wakeup');
-
-    const lgn_status = )";
-
-const char *controller_page2 =
-    R"(;
 
     const spans = [];
     const scr = document.getElementById('screen');
@@ -479,6 +479,8 @@ const char *controller_page2 =
     scr.addEventListener("click", updatescr);
 
     const wakenuc = async (keep) => {
+        disableall(true);
+        wk.innerHTML = 'WakeUp: ...';
         let nf = new FormData();
         nf.append('id', 'wakeup');
         if (keep !== undefined) {
@@ -495,6 +497,7 @@ const char *controller_page2 =
             wk.innerHTML = 'WakeUp: keep';
         else
             wk.innerHTML = 'WakeUp: sleeping';
+        disableall(false);
     }
 
     if (lgn_status) {
@@ -516,14 +519,20 @@ const char *controller_page2 =
             hash &= 0x7fffffff;
         }
         return hash.toString();
-    };
+    }
+
+    function disableall(dis) {
+        document.querySelectorAll('button').forEach(btn => {
+            btn.disabled = dis;
+            btn.style.background = dis ? 'gray' : '#2abda4';
+        });
+    }
 
     lgn.onsubmit = async (e) => {
         e.preventDefault();
         let nf = new FormData();
         nf.append('id', 'login');
         const tk = hash(pwd.value + '-' + Math.floor(Date.now() / 1000));
-        localStorage.setItem('tk', tk);
         nf.append('tk', tk);
         const resp = await fetch('', {
             method: 'POST',
@@ -536,7 +545,6 @@ const char *controller_page2 =
             lgn.style.display = 'none';
             ctl.style.display = 'block';
         } else {
-            localStorage.removeItem('tk');
             alert(txt);
         }
     };
@@ -545,19 +553,11 @@ const char *controller_page2 =
         e.preventDefault();
         let nf = new FormData();
         nf.append('id', e.submitter.id);
-        nf.append('tk', localStorage.getItem('tk'));
 
         if (e.submitter.id === 'logout') {
-            localStorage.removeItem('tk');
             document.cookie = 'awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             window.location.reload();
             return;
-        }
-
-        if (e.submitter.id === 'reset') {
-            if (!confirm('reset?')) {
-                return;
-            }
         }
 
         if (e.submitter.id === 'update') {
@@ -569,11 +569,7 @@ const char *controller_page2 =
                 nf.append('size', file.size);
                 nf.append('update', file);
                 upd.innerHTML = 'FLASHING...';
-                scr.style.display = 'none';
-                document.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
-                upd.style.display = 'block';
-                upd.style.background = 'gray';
-                upd.disabled = true;
+                disableall(true);
                 fetch('update', {
                     method: 'POST',
                     body: nf
@@ -589,17 +585,36 @@ const char *controller_page2 =
                             }
                         });
                     } else {
+                        upd.style.background = 'red';
                         upd.innerHTML = 'Err: ' + r.status;
                     }
                 });
             });
             ele.click();
+            return;
         }
 
         if (e.submitter.id === 'wakeup') {
-            curr = wk.innerHTML;
-            wakenuc(curr.includes('sleeping') || curr.includes('auto'))
+            wakenuc(wk.innerHTML.includes('auto'));
+            return;
         }
+
+        if (e.submitter.id === 'reset') {
+            if (!confirm('reset?')) {
+                return;
+            }
+        }
+
+        disableall(true);
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const s = (await resp.text());
+        if (!s.startsWith('OK'))
+            alert(s);
+        disableall(false);
+
     };
 
 </script>
@@ -624,13 +639,23 @@ class WakeUpTool {
       "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
 
 public:
+  String restartdocker() {
+    String ret = "ERR: connection";
+    if (httpClient.begin(wifiClient, "192.168.31.222", 1000,
+                         "/restartdocker")) {
+      if (httpClient.GET() == HTTP_CODE_OK)
+        ret = httpClient.getString();
+      httpClient.end();
+    }
+    return ret;
+  }
+
   int check() {
     int ret = -2;
-    if (httpClient.begin(wifiClient, "192.168.31.222", 8080, "/wake")) {
+    if (httpClient.begin(wifiClient, "192.168.31.222", 1000, "/wake")) {
       int errCode = httpClient.GET();
-      String res = httpClient.getString();
       if (errCode == HTTP_CODE_OK)
-        ret = res.charAt(2) == '1';
+        ret = httpClient.getString().charAt(2) == '1';
       else
         ret = -1;
       httpClient.end();
@@ -640,12 +665,11 @@ public:
 
   int keep(bool k) {
     int ret = -2;
-    if (httpClient.begin(wifiClient, "192.168.31.222", 8080,
+    if (httpClient.begin(wifiClient, "192.168.31.222", 1000,
                          "/wake?keep=" + String(k))) {
       int errCode = httpClient.GET();
-      String res = httpClient.getString();
       if (errCode == HTTP_CODE_OK)
-        ret = res.charAt(2) == '1';
+        ret = httpClient.getString().charAt(2) == '1';
       else
         ret = -1;
       httpClient.end();
@@ -790,6 +814,12 @@ void NTPClock::setup() {
       return;
     }
 
+    if (arg_id == "docker") {
+      auto r = wake_up_tool.restartdocker();
+      matrix_server.send(200, "text/plain", r);
+      return;
+    }
+
     if (arg_id == "wakeup") {
       auto q = wake_up_tool.check();
       auto arg_action = matrix_server.arg("action");
@@ -816,7 +846,7 @@ void NTPClock::setup() {
       }
       if (arg_action == "auto") {
         if (q >= 0) {
-          wake_up_tool.keep(false);
+          q = wake_up_tool.keep(false);
           matrix_server.send(200, "text/plain", "OK" + String(q));
           return;
         } else {
