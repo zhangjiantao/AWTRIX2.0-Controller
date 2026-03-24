@@ -253,375 +253,10 @@ void NTPClock::event(const bool *pushed, const int *timeout) {
 }
 
 const char *controller_page1 =
-    R"(<!DOCTYPE html>
-<html lang='zxx'>
-<head>
-    <title>Awtrix Controller</title>
-
-    <!-- Meta tags -->
-    <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
-
-    <style>
-        body,
-        html {
-            margin: 0;
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, Menlo, Monaco, Consolas, serif;
-        }
-
-        .wrapper {
-            width: 100%;
-            padding-right: 15px;
-            padding-left: 15px;
-            margin-right: auto;
-            margin-left: auto;
-        }
-
-        @media (min-width: 576px) {
-            .wrapper {
-                max-width: 540px;
-            }
-        }
-
-        @media (min-width: 768px) {
-            .wrapper {
-                max-width: 720px;
-            }
-        }
-
-        @media (min-width: 992px) {
-            .wrapper {
-                max-width: 960px;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .wrapper {
-                max-width: 1140px;
-            }
-        }
-
-        button,
-        .btn,
-        select {
-            cursor: pointer;
-        }
-
-        .lgform #form-section {
-            background-size: cover;
-            -webkit-background-size: cover;
-            position: relative;
-            display: grid;
-            align-items: center;
-            min-height: 100vh;
-            z-index: 0;
-            padding: 15px 0;
-        }
-
-        .lgform #form-section:before {
-            content: '';
-            background: rgba(0, 0, 0, 0.65);
-            position: absolute;
-            top: 0;
-            min-height: 100%;
-            left: 0;
-            right: 0;
-            z-index: -1;
-        }
-
-        .lgform .logo {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .lgform .logo a {
-            font-size: 36px;
-            color: #fff;
-            line-height: 40px;
-            font-weight: normal;
-        }
-
-        .lgform .login-form {
-            background: #fff;
-        }
-
-        .lgform .login-form form input[type='text'],
-        .lgform .login-form form input[type='password'] {
-            -webkit-appearance: none;
-            font-size: 20px;
-            color: #777777;
-            border: none;
-            width: 100%;
-            background-color: #fff;
-            padding: 15px;
-        }
-
-        .lgform .login-form form input[type='text']:focus,
-        .lgform .login-form form input[type='password']:focus {
-            outline: none;
-        }
-
-        .lgform .login-form form button {
-            -webkit-appearance: none;
-            font-size: 20px;
-            line-height: 25px;
-            text-align: center;
-            color: #ffffff;
-            background: #2abda4;
-            height: 55px;
-            border: none;
-            display: block;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            opacity: 0.8;
-            transition: 0.3s ease-in-out;
-        }
-
-        .lgform .login-form form button:hover {
-            background: #2abda4;
-            transition: 0.2s ease-in-out;
-            opacity: 1;
-        }
-
-        .lgform .login-form form button:focus {
-            outline: none;
-        }
-
-        #screen {
-            background-color: black;
-            line-height: .6;
-            text-align: center;
-            letter-spacing: 2px;
-            font-size: 2.5vw;
-        }
-
-
-    </style>
-</head>
-
-<body>
-
-<section class='lgform'>
-    <div id='form-section'>
-        <div class='wrapper'>
-            <div class='login-form'>
-                <form id='lgn' style='display: none'>
-                    <input id='pwd' type='password' name='tk' placeholder='Password'
-                           autocomplete='new-password' required='required'/>
-                    <button id='login'>Login</button>
-                </form>
-                <form id='ctl' style='display: none'>
-                    <div style='display: flex; align-items: center; justify-content: center;'>
-                        <button id='0'>L</button>
-                        <button id='1'>M</button>
-                        <button id='2'>R</button>
-                    </div>
-                    <div id='screen'></div>
-                    <button id='update'>Update</button>
-                    <button id='wakeup'>WakeUp</button>
-                    <button id='docker'>Docker</button>
-                    <button id='reboot'>Reboot</button>
-                    <button id='reset'>Reset!</button>
-                    <button id='logout'>Logout</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</section>
-<script>
-    const lgn_status = )";
+    R"(<!DOCTYPE html><html lang=zxx><head><title>Awtrix Controller</title><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}button,.btn,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:'';background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=text],.lgform .login-form form input[type=password]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=text]:focus,.lgform .login-form form input[type=password]:focus{outline:0}.lgform .login-form form button{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}#screen{background-color:#000;line-height:.6;text-align:center;letter-spacing:2px;font-size:2.5vw}</style><body><section class=lgform><div id=form-section><div class=wrapper><div class=login-form><form id=lgn style=display:none><input id=pwd type=password name=tk placeholder=Password autocomplete=new-password required> <button id=login>Login</button></form><form id=ctl style=display:none><div style=display:flex;align-items:center;justify-content:center><button id=0>L</button> <button id=1>M</button> <button id=2>R</button></div><div id=screen></div><button id=update>Update</button> <button id=wakeup>WakeUp</button> <button id=docker>Docker</button> <button id=reboot>Reboot</button> <button id=reset>Reset!</button> <button id=logout>Logout</button></form></div></div></div></section><script>const lgn_status=)";
 
 const char *controller_page2 =
-    R"(;
-    const lgn = document.querySelector('#lgn');
-    const ctl = document.querySelector('#ctl');
-    const pwd = document.querySelector('#pwd');
-    const upd = document.querySelector('#update');
-    const wk = document.querySelector('#wakeup');
-
-    const spans = [];
-    const scr = document.getElementById('screen');
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 32; j++) {
-            const span = document.createElement('span');
-            span.innerText = '■';
-            scr.appendChild(span);
-            spans.push(span);
-        }
-        scr.append(document.createElement('br'));
-    }
-
-    const updatescr = async () => {
-        let nf = new FormData();
-        nf.append('id', 'screen');
-        const resp = await fetch('', {
-            method: 'POST',
-            body: nf
-        });
-        const txt = await resp.text();
-        const data = txt.split(',');
-        if (data.length === 256) {
-            for (let i = 0; i < 256; i++) {
-                const c = parseInt(data[i]);
-                const r = (c & 0xff0000) >> 16;
-                const g = (c & 0xff00) >> 8;
-                const b = c & 0xff;
-                spans[i].style.color = 'rgb(' + r + ',' + g + ',' + b + ')';
-            }
-        }
-    };
-    scr.addEventListener("click", updatescr);
-
-    const wakenuc = async (keep) => {
-        disableall(true);
-        wk.innerHTML = 'WakeUp: ...';
-        let nf = new FormData();
-        nf.append('id', 'wakeup');
-        if (keep !== undefined) {
-            nf.append('action', keep ? 'keep' : 'auto')
-        }
-        const resp = await fetch('', {
-            method: 'POST',
-            body: nf
-        });
-        const s = (await resp.text()).charAt(2);
-        if (s === '0')
-            wk.innerHTML = 'WakeUp: auto';
-        else if (s === '1')
-            wk.innerHTML = 'WakeUp: keep';
-        else
-            wk.innerHTML = 'WakeUp: sleeping';
-        disableall(false);
-    }
-
-    if (lgn_status) {
-        updatescr();
-        wakenuc();
-        ctl.style.display = 'block';
-    } else {
-        lgn.style.display = 'block';
-    }
-
-
-    function hash(str) {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            const char = str.charCodeAt(i);
-            hash = hash * 131;
-            hash &= 0x7fffffff;
-            hash += char;
-            hash &= 0x7fffffff;
-        }
-        return hash.toString();
-    }
-
-    function disableall(dis) {
-        document.querySelectorAll('button').forEach(btn => {
-            btn.disabled = dis;
-            btn.style.background = dis ? 'gray' : '#2abda4';
-        });
-    }
-
-    lgn.onsubmit = async (e) => {
-        e.preventDefault();
-        let nf = new FormData();
-        nf.append('id', 'login');
-        const tk = hash(pwd.value + '-' + Math.floor(Date.now() / 1000));
-        nf.append('tk', tk);
-        const resp = await fetch('', {
-            method: 'POST',
-            body: nf
-        });
-        const txt = await resp.text();
-        if (txt === 'OK') {
-            updatescr();
-            wakenuc();
-            lgn.style.display = 'none';
-            ctl.style.display = 'block';
-        } else {
-            alert(txt);
-        }
-    };
-
-    ctl.onsubmit = async (e) => {
-        e.preventDefault();
-        let nf = new FormData();
-        nf.append('id', e.submitter.id);
-
-        if (e.submitter.id === 'logout') {
-            document.cookie = 'awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-            window.location.reload();
-            return;
-        }
-
-        if (e.submitter.id === 'update') {
-            const ele = document.createElement('input');
-            ele.type = 'file';
-            ele.style.display = 'none';
-            ele.addEventListener('change', e => {
-                const file = e.target.files[0];
-                nf.append('size', file.size);
-                nf.append('update', file);
-                upd.innerHTML = 'FLASHING...';
-                disableall(true);
-                fetch('update', {
-                    method: 'POST',
-                    body: nf
-                }).then(r => {
-                    if (r.ok) {
-                        r.text().then(txt => {
-                            if (!txt.startsWith('OK')) {
-                                upd.style.background = 'red';
-                                upd.innerHTML = 'Err: ' + txt;
-                            } else {
-                                upd.style.background = 'green';
-                                upd.innerHTML = 'Done.';
-                            }
-                        });
-                    } else {
-                        upd.style.background = 'red';
-                        upd.innerHTML = 'Err: ' + r.status;
-                    }
-                });
-            });
-            ele.click();
-            return;
-        }
-
-        if (e.submitter.id === 'wakeup') {
-            wakenuc(wk.innerHTML.includes('auto'));
-            return;
-        }
-
-        if (e.submitter.id === 'reset') {
-            if (!confirm('reset?')) {
-                return;
-            }
-        }
-
-        disableall(true);
-        const resp = await fetch('', {
-            method: 'POST',
-            body: nf
-        });
-        const s = (await resp.text());
-        if (!s.startsWith('OK'))
-            alert(s);
-        disableall(false);
-
-    };
-
-</script>
-</body>
-
-</html>
-)";
+    R"(;const lgn=document.querySelector('#lgn');const ctl=document.querySelector('#ctl');const pwd=document.querySelector('#pwd');const upd=document.querySelector('#update');const wk=document.querySelector('#wakeup');const spans=[];const scr=document.getElementById('screen');for(let i=0;i < 8;i++){for(let j=0;j < 32;j++){const span=document.createElement('span');span.innerText='■';scr.appendChild(span);spans.push(span);}scr.append(document.createElement('br'));}const updatescr=async()=>{let nf=new FormData();nf.append('id','screen');const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();const data=txt.split(',');if(data.length===256){for(let i=0;i < 256;i++){const c=parseInt(data[i]);const r=(c & 0xff0000)>> 16;const g=(c & 0xff00)>> 8;const b=c & 0xff;spans[i].style.color='rgb(' + r + ',' + g + ',' + b + ')';}}};scr.addEventListener("click",updatescr);const wakenuc=async(keep)=>{disableall(true);wk.innerHTML='WakeUp:...';let nf=new FormData();nf.append('id','wakeup');if(keep!==undefined){nf.append('action',keep?'keep':'auto')}const resp=await fetch('',{method:'POST',body:nf});const s=(await resp.text()).charAt(2);if(s==='0')wk.innerHTML='WakeUp:auto';else if(s==='1')wk.innerHTML='WakeUp:keep';else wk.innerHTML='WakeUp:sleeping';disableall(false);};if(lgn_status){updatescr();wakenuc();ctl.style.display='block';}else{lgn.style.display='block';}function hash(str){let hash=0;for(let i=0;i < str.length;i++){const char=str.charCodeAt(i);hash=hash * 131;hash &=0x7fffffff;hash +=char;hash &=0x7fffffff;}return hash.toString();}function disableall(dis){document.querySelectorAll('button').forEach(btn=>{btn.disabled=dis;btn.style.background=dis?'gray':'#2abda4';});}lgn.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id','login');const tk=hash(pwd.value + '-' + Math.floor(Date.now()/ 1000));nf.append('tk',tk);const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(txt==='OK'){updatescr();wakenuc();lgn.style.display='none';ctl.style.display='block';}else{alert(txt);}};ctl.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id',e.submitter.id);if(e.submitter.id==='logout'){document.cookie='awtrix_token=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/;';window.location.reload();return;}if(e.submitter.id==='update'){const ele=document.createElement('input');ele.type='file';ele.style.display='none';ele.addEventListener('change',e=>{const file=e.target.files[0];nf.append('size',file.size);nf.append('update',file);upd.innerHTML='FLASHING...';disableall(true);fetch('update',{method:'POST',body:nf}).then(r=>{if(r.ok){r.text().then(txt=>{if(!txt.startsWith('OK')){upd.style.background='red';upd.innerHTML='Err:' + txt;}else{upd.style.background='green';upd.innerHTML='Done.';}});}else{upd.style.background='red';upd.innerHTML='Err:' + r.status;}});});ele.click();return;}if(e.submitter.id==='wakeup'){wakenuc(wk.innerHTML.includes('auto'));return;}if(e.submitter.id==='reset'){if(!confirm('reset?')){return;}}disableall(true);const resp=await fetch('',{method:'POST',body:nf});const s=(await resp.text());if(!s.startsWith('OK')){alert(s)};disableall(false);};</script>)";
 
 class WakeUpTool {
   HTTPClient httpClient;
@@ -638,6 +273,23 @@ class WakeUpTool {
       "\"MDAwMDAwMDAwMDAwMDAwMA==\",\"encrypt\":true,\"data\":"
       "\"IyuddWiyKYw54CrngLXdw+29BvxYDeWdwSAwmYqdMCQ=\"}";
 
+  String sendCommand(bool open, int &errCode) {
+    String res;
+
+    if (httpClient.begin(wifiClient, "192.168.31.238", 8081,
+                         "/zeroconf/switch")) {
+      errCode = httpClient.POST(open ? method_open : method_close);
+      res = httpClient.getString();
+      if (errCode > 0) {
+        if (errCode == HTTP_CODE_OK || errCode == HTTP_CODE_MOVED_PERMANENTLY) {
+          errCode = 0;
+        }
+      }
+      httpClient.end();
+    }
+    return res;
+  }
+
 public:
   String restartdocker() {
     String ret = "ERR: connection";
@@ -652,13 +304,15 @@ public:
 
   int check() {
     int ret = -2;
-    if (httpClient.begin(wifiClient, "192.168.31.222", 1000, "/wake")) {
-      int errCode = httpClient.GET();
+    HTTPClient chkClient;
+    chkClient.setTimeout(1000);
+    if (chkClient.begin(wifiClient, "192.168.31.222", 1000, "/wake")) {
+      int errCode = chkClient.GET();
       if (errCode == HTTP_CODE_OK)
-        ret = httpClient.getString().charAt(2) == '1';
+        ret = chkClient.getString().charAt(2) == '1';
       else
         ret = -1;
-      httpClient.end();
+      chkClient.end();
     }
     return ret;
   }
@@ -677,21 +331,11 @@ public:
     return ret;
   }
 
-  String sendCommand(bool open, int &errCode) {
-    String res;
-
-    if (httpClient.begin(wifiClient, "192.168.31.238", 8081,
-                         "/zeroconf/switch")) {
-      errCode = httpClient.POST(open ? method_open : method_close);
-      res = httpClient.getString();
-      if (errCode > 0) {
-        if (errCode == HTTP_CODE_OK || errCode == HTTP_CODE_MOVED_PERMANENTLY) {
-          errCode = 0;
-        }
-      }
-      httpClient.end();
-    }
-    return res;
+  void wakeup() {
+    int errCode;
+    sendCommand(true, errCode);
+    delay(500);
+    sendCommand(false, errCode);
   }
 };
 
@@ -833,14 +477,9 @@ void NTPClock::setup() {
           matrix_server.send(200, "text/plain", "OK" + String(q));
           return;
         } else {
-          int errCode;
-          auto res1 = wake_up_tool.sendCommand(true, errCode);
-          delay(500);
-          auto res2 = wake_up_tool.sendCommand(false, errCode);
-          delay(500);
+          wake_up_tool.wakeup();
           q = wake_up_tool.keep(true);
-          matrix_server.send(200, "text/plain",
-                             "OK" + String(q) + "," + res1 + "," + res2);
+          matrix_server.send(200, "text/plain", "OK" + String(q));
           return;
         }
       }
@@ -850,14 +489,9 @@ void NTPClock::setup() {
           matrix_server.send(200, "text/plain", "OK" + String(q));
           return;
         } else {
-          int errCode;
-          auto res1 = wake_up_tool.sendCommand(true, errCode);
-          delay(500);
-          auto res2 = wake_up_tool.sendCommand(false, errCode);
-          delay(500);
+          wake_up_tool.wakeup();
           q = wake_up_tool.keep(false);
-          matrix_server.send(200, "text/plain",
-                             "OK" + String(q) + "," + res1 + "," + res2);
+          matrix_server.send(200, "text/plain", "OK" + String(q));
           return;
         }
       }

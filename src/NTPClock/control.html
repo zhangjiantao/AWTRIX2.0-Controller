@@ -240,7 +240,7 @@
         else
             wk.innerHTML = 'WakeUp: sleeping';
         disableall(false);
-    }
+    };
 
     if (lgn_status) {
         updatescr();
@@ -353,12 +353,11 @@
             body: nf
         });
         const s = (await resp.text());
-        if (!s.startsWith('OK'))
+        if (!s.startsWith('OK')) {
             alert(s);
+        }
         disableall(false);
-
     };
-
 </script>
 </body>
 
