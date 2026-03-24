@@ -30,7 +30,7 @@ extern NTPClient ntp;
     X;                                                                         \
   } while (0)
 
-#define GLOBAL_FPS 60
+#define GLOBAL_FPS 30
 #define GLOBAL_DELAY (1000 / GLOBAL_FPS)
 
 #define RANDOM_RGB(r, g, b)                                                    \
@@ -113,8 +113,6 @@ class NTPClock {
 
 public:
   NTPClock();
-
-  static bool should_wait_reconnect(const char *server);
 
   void setup();
 

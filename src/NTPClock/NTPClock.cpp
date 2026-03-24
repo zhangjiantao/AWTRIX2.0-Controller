@@ -205,16 +205,6 @@ public:
 
 NTPClock::NTPClock() { m = new MatrixImpl; }
 
-bool NTPClock::should_wait_reconnect(const char *sv) {
-  if (!strcmp(sv, "0.0.0.0"))
-    return false;
-  static unsigned long wait_start = 0;
-  wait_start = wait_start ? wait_start : millis();
-  if (millis() - wait_start < 2000)
-    return true;
-  return false;
-}
-
 void NTPClock::event(const bool *pushed, const int *timeout) {
   if (pushed[0] && millis() - timeout[0] < GLOBAL_DELAY) {
     dfmp3.playAdvertisement(9);
@@ -416,10 +406,6 @@ TokenChecker token_checker;
 
 extern void flashProgress(unsigned int progress, unsigned int total);
 void NTPClock::setup() {
-  static bool start = false;
-  if (start)
-    return;
-
   matrix_server.on("/", []() {
     extern unsigned long startup_time;
     time_t timep = startup_time;
@@ -555,6 +541,8 @@ void NTPClock::setup() {
         matrix_server.sendHeader("Connection", "close");
         matrix_server.send(200, "text/plain",
                            (Update.hasError()) ? "FAIL" : "OK");
+        yield();
+        delay(500);
         ESP.restart();
       },
       []() {
@@ -609,16 +597,19 @@ void NTPClock::setup() {
   size_t sz = sizeof(hks) / sizeof(char *);
   matrix_server.collectHeaders(hks, sz); // ask server to track these headers
   matrix_server.begin();
-
-  start = true;
 }
 
 void NTPClock::loop(bool *pushed, int *timeout) {
   event(pushed, timeout);
-  setup();
-  matrix->clear();
-  m->render();
-  m->loop();
-  matrix->show();
-  delay(GLOBAL_DELAY);
+
+  static unsigned long previousMillis = 0;
+  auto now = millis();
+  if (now - previousMillis >= GLOBAL_DELAY) {
+    matrix->clear();
+    m->render();
+    m->loop();
+    matrix->show();
+    previousMillis = now;
+  }
+  yield();
 }
