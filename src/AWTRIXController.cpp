@@ -584,6 +584,8 @@ void setup() {
   });
 
   ArduinoOTA.begin();
+
+  system_update_cpu_freq(160);
 }
 
 void loop() {

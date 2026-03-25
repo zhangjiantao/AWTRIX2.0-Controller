@@ -180,7 +180,6 @@
     </div>
 </section>
 <script>
-    const lgn_status = 1;
     const lgn = document.querySelector('#lgn');
     const ctl = document.querySelector('#ctl');
     const pwd = document.querySelector('#pwd');
@@ -203,13 +202,25 @@
         const data = txt.split(',').slice(1);
         if (data.length === 256) {
             for (let i = 0; i < 256; i++) {
-                const c = parseInt(data[i]);
+                const c = parseInt(data[i], 16);
                 const r = (c & 0xff0000) >> 16;
                 const g = (c & 0xff00) >> 8;
                 const b = c & 0xff;
                 spans[i].style.color = 'rgb(' + r + ',' + g + ',' + b + ')';
             }
         }
+    }
+
+    function updatewakebtn(txt) {
+        const s = txt.charAt(2);
+        if (s === '0')
+            wk.innerHTML = 'WakeUp: auto';
+        else if (s === '1')
+            wk.innerHTML = 'WakeUp: keep';
+        else
+            wk.innerHTML = 'WakeUp: sleeping';
+        lgn.style.display = 'none';
+        ctl.style.display = 'block';
     }
 
     async function updatescr() {
@@ -246,9 +257,10 @@
         disableall(false);
     }
 
-    if (lgn_status) {
-        updatescr();
-        wakenuc();
+    const txt = inject_login_data();
+    if (txt.length > 0) {
+        updatespans(txt);
+        updatewakebtn(txt);
         ctl.style.display = 'block';
     } else {
         lgn.style.display = 'block';
@@ -287,15 +299,7 @@
         const txt = await resp.text();
         if (txt.startsWith('OK')) {
             updatespans(txt);
-            const s = txt.charAt(2);
-            if (s === '0')
-                wk.innerHTML = 'WakeUp: auto';
-            else if (s === '1')
-                wk.innerHTML = 'WakeUp: keep';
-            else
-                wk.innerHTML = 'WakeUp: sleeping';
-            lgn.style.display = 'none';
-            ctl.style.display = 'block';
+            updatewakebtn(txt);
         } else {
             alert(txt);
         }
@@ -371,5 +375,4 @@
     };
 </script>
 </body>
-
 </html>
