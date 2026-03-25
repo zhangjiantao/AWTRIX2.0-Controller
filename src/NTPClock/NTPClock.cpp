@@ -243,10 +243,385 @@ void NTPClock::event(const bool *pushed, const int *timeout) {
 }
 
 const char *controller_page1 =
-    R"(<!DOCTYPE html><html lang=zxx><head><title>Awtrix Controller</title><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><style>body,html{margin:0}*{box-sizing:border-box;font-family:-apple-system,Menlo,Monaco,Consolas,serif}.wrapper{width:100%;padding-right:15px;padding-left:15px;margin-right:auto;margin-left:auto}@media (min-width:576px){.wrapper{max-width:540px}}@media (min-width:768px){.wrapper{max-width:720px}}@media (min-width:992px){.wrapper{max-width:960px}}@media (min-width:1200px){.wrapper{max-width:1140px}}button,.btn,select{cursor:pointer}.lgform #form-section{background-size:cover;-webkit-background-size:cover;position:relative;display:grid;align-items:center;min-height:100vh;z-index:0;padding:15px 0}.lgform #form-section:before{content:'';background:rgba(0,0,0,.65);position:absolute;top:0;min-height:100%;left:0;right:0;z-index:-1}.lgform .logo{text-align:center;margin-bottom:40px}.lgform .logo a{font-size:36px;color:#fff;line-height:40px;font-weight:400}.lgform .login-form{background:#fff}.lgform .login-form form input[type=text],.lgform .login-form form input[type=password]{-webkit-appearance:none;font-size:20px;color:#777;border:none;width:100%;background-color:#fff;padding:15px}.lgform .login-form form input[type=text]:focus,.lgform .login-form form input[type=password]:focus{outline:0}.lgform .login-form form button{-webkit-appearance:none;font-size:20px;line-height:25px;text-align:center;color:#fff;background:#2abda4;height:55px;border:none;display:block;cursor:pointer;width:100%;font-weight:700;opacity:.8;transition:.3s ease-in-out}.lgform .login-form form button:hover{background:#2abda4;transition:.2s ease-in-out;opacity:1}.lgform .login-form form button:focus{outline:0}#screen{background-color:#000;line-height:.6;text-align:center;letter-spacing:2px;font-size:2.5vw}</style><body><section class=lgform><div id=form-section><div class=wrapper><div class=login-form><form id=lgn style=display:none><input id=pwd type=password name=tk placeholder=Password autocomplete=new-password required> <button id=login>Login</button></form><form id=ctl style=display:none><div style=display:flex;align-items:center;justify-content:center><button id=0>L</button> <button id=1>M</button> <button id=2>R</button></div><div id=screen></div><button id=update>Update</button> <button id=wakeup>WakeUp</button> <button id=docker>Docker</button> <button id=reboot>Reboot</button> <button id=reset>Reset!</button> <button id=logout>Logout</button></form></div></div></div></section><script>const lgn_status=)";
+    R"(<!DOCTYPE html>
+<html lang='zxx'>
+<head>
+    <title>Awtrix Controller</title>
+
+    <!-- Meta tags -->
+    <meta charset='UTF-8'>
+    <link rel="icon" type="image/png"
+          href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGl0lEQVR4nO2a+VNTVxTHM/2l9ofO9Nf2n+gPnZJALaJ1qGVs3ZeOdiAvSEHErS5VQJZOXabWoRSnWGnHOmUMW1sxIaIsxiRkeS8LEAUSIAtkewhEiLLK6dyHCQQIIrwEeObMfH9J8s495/PuO+fem8dihS1sYaPbOInEtuhknSA6RaekRck6QSRGbGWtBuMkErvXpzZ6Mot74ULFU1qEfMUcavRE8ohdrJVuMQd1dTn8fvhbCbQqh98H6w7q6lgr3aJTdNpL/w34Ahc0T0C7axzana8no3MchM0TPj/IJ/LNWm0AHhomwNwzviiha1cUgChM/QGbq97P5qqTAik6WWv1B/BiCQBe+ANI1lrnG5uDEfs+SiLeD0rybJ46PQIjnkclqdxrv1UOB1J0imYiaABSNBPzjR2VqHSjGCN4xBlak/8YIxIiebhn45EGiD02v2JSNVSw3sDFbYt/BNC10wEg395xNp9Swte5jX7amk4AipHDwz0R8epvaAPAwYiuDYflr0weaX2qBi7+OwWghAB4aHwB0tcUugZd6/WDfCLfaIy4Ewooqh+Gqoe9vu8rpU/hlmwE9uY2woY0BbAxvIue5Hc1vMPG8PGFJD85A3BIu2qjvQ0eKrDB+lSCGmN7hhr+kXlgmM+HRpEO6uq7YYhfAtJaExzMN1K/icDw8XXx9WuWDODDeO17bAwfXiiAjUfl8GmyBuJO6GHLmRZahHytTdZQ09sLAEGR1XRQEJBaBUooVkz4AKCYUewhBxCLdLQBPjsshw1p9Aj5Qj69/r0AvHd+5NYtaBLpqM9WBoBjwRUCUCF7RiXfekcBDffbqVkgrrW8GQDiTirghmQUauu6qWmP7ny1mIRS2RDsP9/MfACxxxpgWzoB8Zce+WlPjs73fdAAZBS1QZttZN7+3ekag3IJuayAggagStlLJdnweBBEqj5KQlU/VKoGKQnwAegkJ0HsOKtiHgAR3kcldyhv8llDSrzS6tezVcYh6jc7M/AwgNiXv4k7IYfEwmZI+r2JPl1rggOXdJQSzmtXNoBsvQVSOzpoVVpnp1/tySszhw7AkXx9QACazuFZAE52mIIOQKjsDR2AC8UdcwL4UzLmK4LTAeQQ5qACMJHjkHvDGDoAytZB2HxKMRtArdsX1Mwi+FWGCrZnE7Rq6xkVJW8sIQNg7hmH+5p+2JutpgDclE/A9Ro3dScCAWBEFxAoJtcBXhnso1BcR4Kk5fmsBRG6M4wDcOQXPUj0A4AbPQGlbPPAb7ety5Z8UAHErhKFAWBBAvDFd3I4mq+Hs9daA+p0YQvsSMeZCaCoqntBJ7o603MKFuMAiF62QXs7Cf1SHJ6omsDqGAKy0QjuOin0EI/ATI4xtw2K8D6wt7tghM+nzuKQhksmz+W86pOomA3AXS/zS3imEBALOeoHICG/CbLkJshWLl4FQgsUVlrnVH6FBbZPqztBBTBQI54XAJLVOewHIN249N2g1jW5ywwkfp0zNAB6tG3zJj9YXTvrETjdbg46gNuyntAVwX4pMWfyHuFdsNo8swAcL2+Fc20WyDQuXiK9G8TNA3MKHdXxLupCuxkidQa/Aohqg8U1dWDK2CJonjbtHAYHeO5UAalpmTUlGQmg9IFrQQshg2MUNp9UMA/AzgycajmB2hES2gmmXpk6M2QUgNhVojAALEgA9mQRcF3QBTfv2QPqr2o7HC94xEwA5RJyVsGzdPWAo7oILCaH77MO5xh8OeOgkpFt0EyOgePeH0CW5oDF6mJ+GxTNANCtlQJZkgk24sGbsQ4QTQOApj5Z/gM4q676rQDnAnCq0gCZhqUthWeq5HGvbyl8X+uG5MtNoQVglwmou0+W5YJTWABmp//RuN9mqIP+f4bu2p/6jVcpfxJaAFaTDWzS2+Aqy6YgWOyDAQFk0LAdfhWA4hrHctQAOTULutXieR+BfZe1cE6ytAORmcq7N7UivVxigi3fK0NcA2z94Kr4EZzCX19ZAxhZBB3iMiBLs8Da2TXnhoiRAAorrb4EUetDbXCu5In2Z7CJCcfiUZj0XQ5GjHodf368gWo36AWJQErL0y/rH6MUAC4ximJn0WERXHxgIa/KrxRtPCyHCB4+QEvyyCK4xM9RB5Se5U5sofokSfWMzVX+xKLL1sXXr+FghCSSpxqMSVVQ7+PT9SI0fVIAio2TiA+yebh4U5rhbRatlgVvsRPUezhcvJyD4XI2RihXkiZjUpVxuMRuFCu9yYctbCym2v9VwEDdm9IrQwAAAABJRU5ErkJggg=="/>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <meta http-equiv='X-UA-Compatible' content='ie=edge'>
+
+    <style>
+        body,
+        html {
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, Menlo, Monaco, Consolas, serif;
+        }
+
+        .wrapper {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        @media (min-width: 576px) {
+            .wrapper {
+                max-width: 540px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .wrapper {
+                max-width: 720px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .wrapper {
+                max-width: 960px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .wrapper {
+                max-width: 1140px;
+            }
+        }
+
+        button,
+        .btn,
+        select {
+            cursor: pointer;
+        }
+
+        .lgform #form-section {
+            background-size: cover;
+            -webkit-background-size: cover;
+            position: relative;
+            display: grid;
+            align-items: center;
+            min-height: 100vh;
+            z-index: 0;
+            padding: 15px 0;
+        }
+
+        .lgform #form-section:before {
+            content: '';
+            background: rgba(0, 0, 0, 0.65);
+            position: absolute;
+            top: 0;
+            min-height: 100%;
+            left: 0;
+            right: 0;
+            z-index: -1;
+        }
+
+        .lgform .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lgform .logo a {
+            font-size: 36px;
+            color: #fff;
+            line-height: 40px;
+            font-weight: normal;
+        }
+
+        .lgform .login-form {
+            background: #fff;
+        }
+
+        .lgform .login-form form input[type='text'],
+        .lgform .login-form form input[type='password'] {
+            -webkit-appearance: none;
+            font-size: 20px;
+            color: #777777;
+            border: none;
+            width: 100%;
+            background-color: #fff;
+            padding: 15px;
+        }
+
+        .lgform .login-form form input[type='text']:focus,
+        .lgform .login-form form input[type='password']:focus {
+            outline: none;
+        }
+
+        .lgform .login-form form button {
+            -webkit-appearance: none;
+            font-size: 20px;
+            line-height: 25px;
+            text-align: center;
+            color: #ffffff;
+            background: #2abda4;
+            height: 55px;
+            border: none;
+            display: block;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            opacity: 0.8;
+            transition: 0.3s ease-in-out;
+        }
+
+        .lgform .login-form form button:hover {
+            background: #2abda4;
+            transition: 0.2s ease-in-out;
+            opacity: 1;
+        }
+
+        .lgform .login-form form button:focus {
+            outline: none;
+        }
+
+        #screen {
+            background-color: black;
+            line-height: .6;
+            text-align: center;
+            letter-spacing: 2px;
+            font-size: 2.5vw;
+        }
+    </style>
+</head>
+
+<body>
+
+<section class='lgform'>
+    <div id='form-section'>
+        <div class='wrapper'>
+            <div class='login-form'>
+                <form id='lgn' style='display: none'>
+                    <input id='pwd' type='password' name='tk' placeholder='Password'
+                           autocomplete='new-password' required='required'/>
+                    <button id='login'>Login</button>
+                </form>
+                <form id='ctl' style='display: none'>
+                    <div style='display: flex; align-items: center; justify-content: center;'>
+                        <button id='0'>L</button>
+                        <button id='1'>M</button>
+                        <button id='2'>R</button>
+                    </div>
+                    <div id='screen'></div>
+                    <button id='update'>Update</button>
+                    <button id='wakeup'>WakeUp</button>
+                    <button id='docker'>Docker</button>
+                    <button id='reboot'>Reboot</button>
+                    <button id='reset'>Reset!</button>
+                    <button id='logout'>Logout</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    const lgn_status = )";
 
 const char *controller_page2 =
-    R"(;const lgn=document.querySelector('#lgn');const ctl=document.querySelector('#ctl');const pwd=document.querySelector('#pwd');const upd=document.querySelector('#update');const wk=document.querySelector('#wakeup');const spans=[];const scr=document.getElementById('screen');for(let i=0;i < 8;i++){for(let j=0;j < 32;j++){const span=document.createElement('span');span.innerText='■';scr.appendChild(span);spans.push(span);}scr.append(document.createElement('br'));}const updatescr=async()=>{let nf=new FormData();nf.append('id','screen');const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();const data=txt.split(',');if(data.length===256){for(let i=0;i < 256;i++){const c=parseInt(data[i]);const r=(c & 0xff0000)>> 16;const g=(c & 0xff00)>> 8;const b=c & 0xff;spans[i].style.color='rgb(' + r + ',' + g + ',' + b + ')';}}};scr.addEventListener("click",updatescr);const wakenuc=async(keep)=>{disableall(true);wk.innerHTML='WakeUp:...';let nf=new FormData();nf.append('id','wakeup');if(keep!==undefined){nf.append('action',keep?'keep':'auto')}const resp=await fetch('',{method:'POST',body:nf});const s=(await resp.text()).charAt(2);if(s==='0')wk.innerHTML='WakeUp:auto';else if(s==='1')wk.innerHTML='WakeUp:keep';else wk.innerHTML='WakeUp:sleeping';disableall(false);};if(lgn_status){updatescr();wakenuc();ctl.style.display='block';}else{lgn.style.display='block';}function hash(str){let hash=0;for(let i=0;i < str.length;i++){const char=str.charCodeAt(i);hash=hash * 131;hash &=0x7fffffff;hash +=char;hash &=0x7fffffff;}return hash.toString();}function disableall(dis){document.querySelectorAll('button').forEach(btn=>{btn.disabled=dis;btn.style.background=dis?'gray':'#2abda4';});}lgn.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id','login');const tk=hash(pwd.value + '-' + Math.floor(Date.now()/ 1000));nf.append('tk',tk);const resp=await fetch('',{method:'POST',body:nf});const txt=await resp.text();if(txt==='OK'){updatescr();wakenuc();lgn.style.display='none';ctl.style.display='block';}else{alert(txt);}};ctl.onsubmit=async(e)=>{e.preventDefault();let nf=new FormData();nf.append('id',e.submitter.id);if(e.submitter.id==='logout'){document.cookie='awtrix_token=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/;';window.location.reload();return;}if(e.submitter.id==='update'){const ele=document.createElement('input');ele.type='file';ele.style.display='none';ele.addEventListener('change',e=>{const file=e.target.files[0];nf.append('size',file.size);nf.append('update',file);upd.innerHTML='FLASHING...';disableall(true);fetch('update',{method:'POST',body:nf}).then(r=>{if(r.ok){r.text().then(txt=>{if(!txt.startsWith('OK')){upd.style.background='red';upd.innerHTML='Err:' + txt;}else{upd.style.background='green';upd.innerHTML='Done.';}});}else{upd.style.background='red';upd.innerHTML='Err:' + r.status;}});});ele.click();return;}if(e.submitter.id==='wakeup'){wakenuc(wk.innerHTML.includes('auto'));return;}if(e.submitter.id==='reset'){if(!confirm('reset?')){return;}}disableall(true);const resp=await fetch('',{method:'POST',body:nf});const s=(await resp.text());if(!s.startsWith('OK')){alert(s)};disableall(false);};</script>)";
+    R"(;
+    const lgn = document.querySelector('#lgn');
+    const ctl = document.querySelector('#ctl');
+    const pwd = document.querySelector('#pwd');
+    const upd = document.querySelector('#update');
+    const wk = document.querySelector('#wakeup');
+
+    const spans = [];
+    const scr = document.getElementById('screen');
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 32; j++) {
+            const span = document.createElement('span');
+            span.innerText = '■';
+            scr.appendChild(span);
+            spans.push(span);
+        }
+        scr.append(document.createElement('br'));
+    }
+
+    function updatespans(txt) {
+        const data = txt.split(',').slice(1);
+        if (data.length === 256) {
+            for (let i = 0; i < 256; i++) {
+                const c = parseInt(data[i]);
+                const r = (c & 0xff0000) >> 16;
+                const g = (c & 0xff00) >> 8;
+                const b = c & 0xff;
+                spans[i].style.color = 'rgb(' + r + ',' + g + ',' + b + ')';
+            }
+        }
+    }
+
+    async function updatescr() {
+        let nf = new FormData();
+        nf.append('id', 'screen');
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        updatespans(await resp.text());
+    }
+
+    scr.addEventListener("click", updatescr);
+
+    async function wakenuc(keep) {
+        disableall(true);
+        wk.innerHTML = 'WakeUp: ...';
+        let nf = new FormData();
+        nf.append('id', 'wakeup');
+        if (keep !== undefined) {
+            nf.append('action', keep ? 'keep' : 'auto')
+        }
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const s = (await resp.text()).charAt(2);
+        if (s === '0')
+            wk.innerHTML = 'WakeUp: auto';
+        else if (s === '1')
+            wk.innerHTML = 'WakeUp: keep';
+        else
+            wk.innerHTML = 'WakeUp: sleeping';
+        disableall(false);
+    }
+
+    if (lgn_status) {
+        updatescr();
+        wakenuc();
+        ctl.style.display = 'block';
+    } else {
+        lgn.style.display = 'block';
+    }
+
+
+    function hash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = hash * 131;
+            hash &= 0x7fffffff;
+            hash += char;
+            hash &= 0x7fffffff;
+        }
+        return hash.toString();
+    }
+
+    function disableall(dis) {
+        document.querySelectorAll('button').forEach(btn => {
+            btn.disabled = dis;
+            btn.style.background = dis ? 'gray' : '#2abda4';
+        });
+    }
+
+    lgn.onsubmit = async (e) => {
+        e.preventDefault();
+        let nf = new FormData();
+        nf.append('id', 'login');
+        const tk = hash(pwd.value + '-' + Math.floor(Date.now() / 1000));
+        nf.append('tk', tk);
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const txt = await resp.text();
+        if (txt.startsWith('OK')) {
+            updatespans(txt);
+            const s = txt.charAt(2);
+            if (s === '0')
+                wk.innerHTML = 'WakeUp: auto';
+            else if (s === '1')
+                wk.innerHTML = 'WakeUp: keep';
+            else
+                wk.innerHTML = 'WakeUp: sleeping';
+            lgn.style.display = 'none';
+            ctl.style.display = 'block';
+        } else {
+            alert(txt);
+        }
+    };
+
+    ctl.onsubmit = async (e) => {
+        e.preventDefault();
+        let nf = new FormData();
+        nf.append('id', e.submitter.id);
+
+        if (e.submitter.id === 'logout') {
+            document.cookie = 'awtrix_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.reload();
+            return;
+        }
+
+        if (e.submitter.id === 'update') {
+            const ele = document.createElement('input');
+            ele.type = 'file';
+            ele.style.display = 'none';
+            ele.addEventListener('change', e => {
+                const file = e.target.files[0];
+                nf.append('size', file.size);
+                nf.append('update', file);
+                upd.innerHTML = 'FLASHING...';
+                disableall(true);
+                fetch('update', {
+                    method: 'POST',
+                    body: nf
+                }).then(r => {
+                    if (r.ok) {
+                        r.text().then(txt => {
+                            if (!txt.startsWith('OK')) {
+                                upd.style.background = 'red';
+                                upd.innerHTML = 'Err: ' + txt;
+                            } else {
+                                upd.style.background = 'green';
+                                upd.innerHTML = 'Done.';
+                            }
+                        });
+                    } else {
+                        upd.style.background = 'red';
+                        upd.innerHTML = 'Err: ' + r.status;
+                    }
+                });
+            });
+            ele.click();
+            return;
+        }
+
+        if (e.submitter.id === 'wakeup') {
+            wakenuc(wk.innerHTML.includes('auto'));
+            return;
+        }
+
+        if (e.submitter.id === 'reset') {
+            if (!confirm('reset?')) {
+                return;
+            }
+        }
+
+        disableall(true);
+        const resp = await fetch('', {
+            method: 'POST',
+            body: nf
+        });
+        const s = (await resp.text());
+        if (!s.startsWith('OK')) {
+            alert(s);
+        }
+        updatespans(s);
+        disableall(false);
+    };
+</script>
+</body>
+
+</html>
+)";
 
 class WakeUpTool {
   HTTPClient httpClient;
@@ -282,7 +657,7 @@ class WakeUpTool {
 
 public:
   String restartdocker() {
-    String ret = "ERR: connection";
+    String ret = "ERRconnection";
     if (httpClient.begin(wifiClient, "192.168.31.222", 1000,
                          "/restartdocker")) {
       if (httpClient.GET() == HTTP_CODE_OK)
@@ -404,6 +779,22 @@ public:
 
 TokenChecker token_checker;
 
+static String getLedPixels() {
+  String r;
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 32; j++) {
+      auto p = matrix_leds[matrix->XY(j, i)];
+      uint32_t c = p.r << 16;
+      c += p.g << 8;
+      c += p.b;
+      r += String(c);
+      if (i != 7 || j != 31)
+        r += ",";
+    }
+  }
+  return r;
+}
+
 extern void flashProgress(unsigned int progress, unsigned int total);
 void NTPClock::setup() {
   matrix_server.on("/", []() {
@@ -436,18 +827,19 @@ void NTPClock::setup() {
       String cookie("awtrix_token=");
       cookie += String(token_checker.gettoken());
       matrix_server.sendHeader("Set-Cookie", cookie);
-      matrix_server.send(200, "text/plain", "OK");
+      auto q = wake_up_tool.check();
+      matrix_server.send(200, "text/plain",
+                         "OK" + String(q) + "," + getLedPixels());
       return;
     }
 
     if (!token_checker.checkToken()) {
-      matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+      matrix_server.send(200, "text/plain", "BADTOKEN");
       return;
     }
 
     if (arg_id == "docker") {
-      auto r = wake_up_tool.restartdocker();
-      matrix_server.send(200, "text/plain", r);
+      matrix_server.send(200, "text/plain", wake_up_tool.restartdocker());
       return;
     }
 
@@ -459,47 +851,25 @@ void NTPClock::setup() {
         return;
       }
       if (arg_action == "keep") {
-        if (q >= 0) {
-          q = wake_up_tool.keep(true);
-          matrix_server.send(200, "text/plain", "OK" + String(q));
-          return;
-        } else {
+        if (q < 0)
           wake_up_tool.wakeup();
-          q = wake_up_tool.keep(true);
-          matrix_server.send(200, "text/plain", "OK" + String(q));
-          return;
-        }
+        q = wake_up_tool.keep(true);
+        matrix_server.send(200, "text/plain", "OK" + String(q));
+        return;
       }
       if (arg_action == "auto") {
-        if (q >= 0) {
-          q = wake_up_tool.keep(false);
-          matrix_server.send(200, "text/plain", "OK" + String(q));
-          return;
-        } else {
+        if (q < 0)
           wake_up_tool.wakeup();
-          q = wake_up_tool.keep(false);
-          matrix_server.send(200, "text/plain", "OK" + String(q));
-          return;
-        }
+        q = wake_up_tool.keep(false);
+        matrix_server.send(200, "text/plain", "OK" + String(q));
+        return;
       }
-      matrix_server.send(200, "text/plain", "ERROR: BADREQ");
+      matrix_server.send(200, "text/plain", "BADREQ");
       return;
     }
 
     if (arg_id == "screen") {
-      String r;
-      for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 32; j++) {
-          auto p = matrix_leds[matrix->XY(j, i)];
-          uint32_t c = p.r << 16;
-          c += p.g << 8;
-          c += p.b;
-          r += String(c);
-          if (i != 7 || j != 31)
-            r += ",";
-        }
-      }
-      matrix_server.send(200, "text/html", r);
+      matrix_server.send(200, "text/html", "OK," + getLedPixels());
       return;
     }
 
@@ -522,18 +892,24 @@ void NTPClock::setup() {
       return;
     }
 
-    int id = arg_id.toInt();
-    if (id < 3 && id >= 0) {
-      bool pushed[3]{false, false, false};
-      int timeout[3]{0, 0, 0};
-      pushed[id] = true;
-      timeout[id] = millis();
-      event(pushed, timeout);
-      matrix_server.send(200, "text/plain", "OK");
-      return;
+    if (arg_id.length() == 1) {
+      int id = arg_id.toInt();
+      if (id < 3 && id >= 0) {
+        bool pushed[3]{false, false, false};
+        int timeout[3]{0, 0, 0};
+        pushed[id] = true;
+        timeout[id] = millis();
+        event(pushed, timeout);
+        for (int i = 0; i < 8; ++i)
+          m->render();
+        matrix->clear();
+        m->render();
+        matrix_server.send(200, "text/plain", "OK," + getLedPixels());
+        return;
+      }
     }
 
-    matrix_server.send(200, "text/plain", "ERROR: BADREQ");
+    matrix_server.send(200, "text/plain", "BADREQ");
   });
 
   matrix_server.on(
@@ -548,7 +924,7 @@ void NTPClock::setup() {
       },
       []() {
         if (!token_checker.checkToken()) {
-          matrix_server.send(200, "text/plain", "ERROR: BADTOKEN");
+          matrix_server.send(200, "text/plain", "BADTOKEN");
           matrix_server.sendHeader("Connection", "close");
           yield();
           return;
@@ -556,7 +932,7 @@ void NTPClock::setup() {
 
         auto totalSize = matrix_server.arg("size").toInt();
         if (totalSize == 0) {
-          matrix_server.send(200, "text/plain", "ERROR: BADREQ");
+          matrix_server.send(200, "text/plain", "BADREQ");
           matrix_server.sendHeader("Connection", "close");
           yield();
           return;
